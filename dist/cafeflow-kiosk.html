@@ -1217,7 +1217,7 @@ body.cfk-noart .cfk-card-body { border-top: 0; min-height: calc(var(--u) * 13); 
 /* ══════════════════════════════════════════════════════════
    5. รายละเอียดสินค้า
    ══════════════════════════════════════════════════════════ */
-body.cfk-portrait  .cfk-item { display: grid; grid-template-rows: auto auto 1fr auto; min-height: 0; }
+body.cfk-portrait  .cfk-item { display: grid; grid-template-rows: auto 1fr auto; min-height: 0; }
 body.cfk-landscape .cfk-item { display: grid; grid-template-rows: auto 1fr auto;
                                grid-template-columns: 1fr 1.25fr; }
 body.cfk-landscape .cfk-item > .cfk-top      { grid-column: 1 / -1; }
@@ -1226,25 +1226,27 @@ body.cfk-landscape .cfk-item > .cfk-actionbar { grid-column: 1 / -1; }
 .cfk-item-left { padding: var(--pad); overflow-y: auto; min-height: 0; }
 .cfk-item-scroll { overflow-y: auto; min-height: 0; padding: 0 var(--pad) var(--pad); }
 body.cfk-portrait .cfk-item-left { display: contents; }
+body.cfk-landscape .cfk-item-scroll { padding-top: var(--pad); }
 
 .cfk-hero { width: 100%; border-radius: calc(var(--u) * 1.6); overflow: hidden; }
-body.cfk-portrait  .cfk-hero { aspect-ratio: 16 / 10; margin: var(--pad) var(--pad) calc(var(--u) * .6);
+/* แนวตั้ง: รูปเป็นแถบเตี้ย ๆ — ตัวเลือกทั้งหมดต้องอยู่ในจอเดียวโดยไม่ต้องเลื่อน */
+body.cfk-portrait  .cfk-hero { height: calc(var(--u) * 15); margin: var(--pad) var(--pad) calc(var(--u) * .4);
                                width: auto; }
 body.cfk-landscape .cfk-hero { aspect-ratio: 1 / 1; }
 .cfk-hero .cfk-media { width: 100%; height: 100%; }
 
-.cfk-item-name { font-size: calc(var(--u) * 2.8); font-weight: 700; color: #111; line-height: 1.25; }
-.cfk-item-en   { font-size: calc(var(--u) * 1.6); color: var(--text-light);
-                 margin-bottom: calc(var(--u) * 1.4); }
+.cfk-item-name { font-size: calc(var(--u) * 2.3); font-weight: 700; color: #111; line-height: 1.25; }
+.cfk-item-en   { font-size: calc(var(--u) * 1.4); color: var(--text-light);
+                 margin-bottom: calc(var(--u) * .4); }
 .cfk-item-eyebrow { font-size: calc(var(--u) * 1.3); font-weight: 700; letter-spacing: .06em;
                     text-transform: uppercase; color: var(--text-muted); }
 
-.cfk-optgroup { margin-top: calc(var(--u) * 2); }
+.cfk-optgroup { margin-top: calc(var(--u) * 1.3); }
 .cfk-optgroup-head {
     display: flex; align-items: center; gap: calc(var(--u) * .8); flex-wrap: wrap;
-    margin-bottom: calc(var(--u) * .9);
+    margin-bottom: calc(var(--u) * .6);
 }
-.cfk-optgroup-head b { font-size: calc(var(--u) * 1.85); font-weight: 700; color: #111; }
+.cfk-optgroup-head b { font-size: calc(var(--u) * 1.6); font-weight: 700; color: #111; }
 .cfk-tag {
     padding: calc(var(--u) * .25) calc(var(--u) * .9); border-radius: 999px;
     font-size: calc(var(--u) * 1.15); font-weight: 700;
@@ -1253,44 +1255,47 @@ body.cfk-landscape .cfk-hero { aspect-ratio: 1 / 1; }
 }
 .cfk-tag-req { background: var(--brand-amber-50); color: #8A6400; border-color: #FDE68A; }
 
-.cfk-opts { display: grid; gap: calc(var(--u) * .9); }
-body.cfk-portrait  .cfk-opts { grid-template-columns: repeat(2, 1fr); }
-body.cfk-landscape .cfk-opts { grid-template-columns: repeat(3, 1fr); }
+/* ตัวเลือกเป็นปุ่มกลม เรียงต่อกันในบรรทัดเดียว (สูงสุด 6 ปุ่มต่อบรรทัด)
+   ปุ่มกว้างอย่างน้อย 1/6 ของแถว ชื่อยาวก็ขยายกว้างขึ้นเอง ไม่ตัดคำ */
+.cfk-opts { --gap: calc(var(--u) * .7); display: flex; flex-wrap: wrap; gap: var(--gap); }
 .cfk-opt {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: calc(var(--u) * .6); cursor: pointer; font-family: inherit; text-align: left;
-    padding: calc(var(--u) * 1.3) calc(var(--u) * 1.4);
-    min-height: calc(var(--u) * 5.4);
-    background: #fff; border: 0.8px solid var(--brand-border); border-radius: var(--r);
-    font-size: calc(var(--u) * 1.6); font-weight: 600; color: #111; line-height: 1.3;
+    flex: 0 1 auto; min-width: calc((100% - 5 * var(--gap)) / 6);
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: calc(var(--u) * .5); cursor: pointer; font-family: inherit; text-align: center;
+    padding: calc(var(--u) * .7) calc(var(--u) * 1.3);
+    min-height: calc(var(--u) * 4.4);
+    background: #fff; border: 0.8px solid var(--brand-border); border-radius: 999px;
+    font-size: calc(var(--u) * 1.45); font-weight: 600; color: #111; line-height: 1.2;
 }
-.cfk-opt b { flex-shrink: 0; font-size: calc(var(--u) * 1.4); color: var(--primary-dark); }
+.cfk-opt b { flex-shrink: 0; font-size: calc(var(--u) * 1.25); color: var(--primary-dark); }
 .cfk-opt.active { background: var(--primary-bg); border-color: var(--primary);
                   color: var(--primary-dark); font-weight: 700; }
 .cfk-optgroup.is-missing .cfk-optgroup-head b { color: var(--status-danger); }
 .cfk-optgroup.is-missing .cfk-opt { border-color: #FFC9CE; }
 
 /* ปุ่มแบบเสิร์ฟ — ราคาโชว์ใต้ชื่อ เห็นก่อนกด */
-.cfk-serves-pick { display: grid; gap: calc(var(--u) * .9);
-                   grid-template-columns: repeat(auto-fit, minmax(calc(var(--u) * 11), 1fr)); }
+.cfk-serves-pick { display: flex; flex-wrap: wrap; gap: calc(var(--u) * .7); }
 .cfk-serve {
-    display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * .2);
-    cursor: pointer; font-family: inherit; min-height: calc(var(--u) * 6.4);
-    padding: calc(var(--u) * 1.2);
-    background: #fff; border: 0.8px solid var(--brand-border); border-radius: var(--r);
+    flex: 1 1 0; display: flex; align-items: center; justify-content: center;
+    gap: calc(var(--u) * .7);
+    cursor: pointer; font-family: inherit; min-height: calc(var(--u) * 4.8);
+    padding: calc(var(--u) * .7) calc(var(--u) * 1.4);
+    background: #fff; border: 0.8px solid var(--brand-border); border-radius: 999px;
 }
-.cfk-serve b     { font-size: calc(var(--u) * 1.9); font-weight: 700; color: #111; }
-.cfk-serve small { font-size: calc(var(--u) * 1.5); font-weight: 600; color: var(--text-muted); }
+.cfk-serve b     { font-size: calc(var(--u) * 1.7); font-weight: 700; color: #111; }
+.cfk-serve small { font-size: calc(var(--u) * 1.4); font-weight: 600; color: var(--text-muted); }
 .cfk-serve.active { background: var(--primary); border-color: var(--primary); }
 .cfk-serve.active b, .cfk-serve.active small { color: #fff; }
 
-.cfk-qty { display: flex; align-items: center; gap: calc(var(--u) * 1.6);
-           margin-top: calc(var(--u) * 1); }
+.cfk-qty { display: flex; align-items: center; gap: calc(var(--u) * 1.4); }
 .cfk-qty button {
-    width: calc(var(--u) * 6); height: calc(var(--u) * 6); cursor: pointer;
+    width: calc(var(--u) * 4.8); height: calc(var(--u) * 4.8); cursor: pointer;
     display: grid; place-items: center; font-family: inherit;
-    background: #fff; border: 0.8px solid var(--brand-border); border-radius: var(--r); color: #111;
+    background: #fff; border: 0.8px solid var(--brand-border); border-radius: 50%; color: #111;
 }
+/* จำนวนอยู่บรรทัดเดียวกับหัวข้อ — ประหยัดความสูงอีกหนึ่งแถว */
+.cfk-optgroup-qty { display: flex; align-items: center; justify-content: space-between; }
+.cfk-optgroup-qty .cfk-optgroup-head { margin-bottom: 0; }
 .cfk-qty button:disabled { opacity: .35; pointer-events: none; }
 .cfk-qty button .cfk-ic { width: calc(var(--u) * 2.4); height: calc(var(--u) * 2.4); }
 .cfk-qty output { font-size: calc(var(--u) * 2.6); font-weight: 800; color: #111;
@@ -1472,6 +1477,158 @@ body.cfk-landscape .cfk-upgrid { grid-template-columns: repeat(4, 1fr); align-co
     font-size: 15px; color: var(--text-secondary);
 }
 
+/* ══════════════════════════════════════════════════════════
+   หน้าชำระ QR + กล้องตรวจสลิป (§17) — หน้าเดียวจบ
+   แถวบน: QR | ภาพตัวอย่างวิธียกสลิป · ล่าง: กล้องจริง + ปุ่มถ่าย/ถ่ายใหม่
+   แนวนอน: แถวบนอยู่ซ้าย กล้องอยู่ขวา
+   ══════════════════════════════════════════════════════════ */
+.cfk-paygrid.has-cam { justify-content: flex-start; gap: calc(var(--u) * 1.4); }
+.cfk-paycol {
+    display: flex; flex-direction: column; align-items: center;
+    gap: calc(var(--u) * 1.1); width: 100%;
+}
+.cfk-payrow { display: contents; }
+.cfk-paygrid.has-cam .cfk-payrow {
+    display: grid; grid-template-columns: auto 1fr; gap: calc(var(--u) * 1.4);
+    width: 100%; align-items: stretch;
+}
+.cfk-paygrid.has-cam .cfk-payrow > .cfk-paycol { width: auto; justify-content: center; }
+.cfk-paygrid.has-cam .cfk-qr-img { width: calc(var(--u) * 20); height: calc(var(--u) * 20); }
+.cfk-paygrid.has-cam .cfk-qr:not(.has-qr) { width: calc(var(--u) * 20); }
+.cfk-payamt { font-size: calc(var(--u) * 5); }
+.cfk-paygrid.has-cam .cfk-payamt { font-size: calc(var(--u) * 4); }
+
+body.cfk-landscape .cfk-paygrid.has-cam {
+    display: grid; grid-template-columns: 1.1fr 1fr; align-items: center;
+}
+
+/* ── การ์ดตัวอย่างข้าง QR ── */
+.cfk-guide {
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center;
+    gap: calc(var(--u) * 1); padding: calc(var(--u) * 1.4);
+    border-radius: calc(var(--u) * 1.6);
+    background: radial-gradient(circle at 50% 110%, #4b5563 0 45%, transparent 46%),
+                linear-gradient(#4b5563, #2b3036);
+    color: #fff;
+}
+.cfk-guide-title { font-size: calc(var(--u) * 1.6); font-weight: 800; text-align: center; }
+.cfk-guide-stage {
+    position: relative; flex: 1; width: 100%; min-height: calc(var(--u) * 20);
+    display: grid; place-items: center;
+}
+.cfk-guide-aim { position: absolute; inset: 2% 18%; }
+.cfk-guide-aim i {
+    position: absolute; width: 20%; height: 16%;
+    border: 4px solid rgba(255, 255, 255, .7);
+}
+.cfk-guide-aim i:nth-child(1) { top: 0; left: 0; border-right: 0; border-bottom: 0; border-top-left-radius: 10px; }
+.cfk-guide-aim i:nth-child(2) { top: 0; right: 0; border-left: 0; border-bottom: 0; border-top-right-radius: 10px; }
+.cfk-guide-aim i:nth-child(3) { bottom: 0; left: 0; border-right: 0; border-top: 0; border-bottom-left-radius: 10px; }
+.cfk-guide-aim i:nth-child(4) { bottom: 0; right: 0; border-left: 0; border-top: 0; border-bottom-right-radius: 10px; }
+.cfk-guide-phone {
+    position: relative; height: calc(var(--u) * 19); width: auto;
+    filter: drop-shadow(0 8px 20px rgba(0, 0, 0, .45));
+    animation: cfk-guide-in 3.2s ease-in-out infinite;
+}
+.cfk-guide-qr { animation: cfk-guide-qr 1.6s ease-in-out infinite; transform-origin: 89px 157px; }
+.cfk-guide-tips { display: flex; flex-wrap: wrap; justify-content: center; gap: calc(var(--u) * .5); }
+.cfk-guide-tips span {
+    padding: calc(var(--u) * .4) calc(var(--u) * .9); border-radius: 999px;
+    background: rgba(255, 255, 255, .92); color: #111;
+    font-size: calc(var(--u) * 1.15); font-weight: 700; white-space: nowrap;
+}
+/* ยกมือถือเข้ามาในกรอบ → ค้าง → ถอยออก วนซ้ำ */
+@keyframes cfk-guide-in {
+    0%   { transform: translate(-30%, 18%) rotate(-10deg) scale(.86); opacity: 0; }
+    25%  { transform: translate(0, 0) rotate(0) scale(1); opacity: 1; }
+    75%  { transform: translate(0, 0) rotate(0) scale(1); opacity: 1; }
+    100% { transform: translate(-30%, 18%) rotate(-10deg) scale(.86); opacity: 0; }
+}
+@keyframes cfk-guide-qr { 50% { transform: scale(1.12); } }
+
+/* ── ตัวชี้ลอยเหนือกล้อง ── */
+.cfk-cam-point {
+    display: flex; flex-direction: column; align-items: center;
+    margin-bottom: calc(var(--u) * -0.8);
+    font-size: calc(var(--u) * 1.5); font-weight: 800;
+    animation: cfk-point 1.2s ease-in-out infinite;
+}
+.cfk-cam-point span {
+    padding: calc(var(--u) * .5) calc(var(--u) * 1.3); border-radius: 999px;
+    background: var(--primary); color: #fff;
+}
+.cfk-cam-point svg { width: calc(var(--u) * 3); height: calc(var(--u) * 3); color: var(--primary); }
+@keyframes cfk-point {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(calc(var(--u) * .9)); }
+}
+
+/* ── กล้องจริง — สถานะอยู่ที่ data-state: starting · scan · checking · fail · nocam · demo ── */
+.cfk-cam {
+    position: relative; width: 100%; aspect-ratio: 4 / 3; overflow: hidden;
+    border-radius: calc(var(--u) * 1.6); background: #111;
+    border: 3px solid transparent; transition: border-color .15s;
+}
+.cfk-cam video, .cfk-cam img {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    /* กลับซ้าย-ขวาเฉพาะที่แสดง ให้ลูกค้าเล็งเหมือนส่องกระจก
+       ภาพที่ส่งตรวจถ่ายจาก video ตรง ๆ จึงไม่กลับ — ตัวหนังสือบนสลิปยังอ่านได้ */
+    transform: scaleX(-1);
+}
+.cfk-cam img { display: none; }
+.cfk-cam[data-state="checking"] img,
+.cfk-cam[data-state="fail"] img { display: block; }
+.cfk-cam[data-state="checking"] img { filter: brightness(.55); }
+.cfk-cam[data-state="fail"] img { filter: brightness(.4) saturate(.5); }
+
+.cfk-cam-aim { position: absolute; inset: 12% 24%; pointer-events: none; }
+.cfk-cam-aim i {
+    position: absolute; width: 18%; height: 18%;
+    border: 4px solid rgba(255, 255, 255, .85); transition: border-color .15s;
+}
+.cfk-cam-aim i:nth-child(1) { top: 0; left: 0; border-right: 0; border-bottom: 0; border-top-left-radius: 10px; }
+.cfk-cam-aim i:nth-child(2) { top: 0; right: 0; border-left: 0; border-bottom: 0; border-top-right-radius: 10px; }
+.cfk-cam-aim i:nth-child(3) { bottom: 0; left: 0; border-right: 0; border-top: 0; border-bottom-left-radius: 10px; }
+.cfk-cam-aim i:nth-child(4) { bottom: 0; right: 0; border-left: 0; border-top: 0; border-bottom-right-radius: 10px; }
+.cfk-cam.is-found { border-color: var(--primary); }
+.cfk-cam.is-found .cfk-cam-aim i { border-color: var(--primary); }
+.cfk-cam:not([data-state="scan"]) .cfk-cam-aim { display: none; }
+
+.cfk-cam-msg {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+    display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * .8);
+    padding: calc(var(--u) * 1.1) calc(var(--u) * 1.4);
+    background: linear-gradient(transparent, rgba(0, 0, 0, .72));
+    color: #fff; font-size: calc(var(--u) * 1.5); font-weight: 600; text-align: center;
+}
+.cfk-cam-msg .cfk-ic { width: calc(var(--u) * 2); height: calc(var(--u) * 2); flex-shrink: 0; }
+.cfk-cam-msg small { font-weight: 400; opacity: .85; }
+.cfk-cam:not([data-state="scan"]) .cfk-cam-msg {
+    top: 0; flex-direction: column; background: none; font-size: calc(var(--u) * 1.8);
+}
+.cfk-cam[data-state="checking"] .cfk-cam-msg .cfk-ic { animation: cfk-spin 1.2s linear infinite; }
+.cfk-cam[data-state="fail"] .cfk-cam-msg .cfk-ic { color: #FCD34D; }
+.cfk-cam[data-state="nocam"], .cfk-cam[data-state="demo"] {
+    background: var(--brand-amber-50); border: 3px dashed var(--brand-border-strong);
+}
+.cfk-cam[data-state="demo"] { background: #fff; aspect-ratio: 16 / 7; }
+.cfk-cam[data-state="nocam"] .cfk-cam-msg { color: #8A6400; }
+.cfk-cam[data-state="demo"] .cfk-cam-msg { color: var(--text-light); font-size: calc(var(--u) * 1.4); }
+.cfk-cam[data-state="nocam"] .cfk-cam-msg .cfk-ic,
+.cfk-cam[data-state="demo"] .cfk-cam-msg .cfk-ic,
+.cfk-cam[data-state="starting"] .cfk-cam-msg .cfk-ic { width: calc(var(--u) * 4); height: calc(var(--u) * 4); }
+
+/* ปุ่มใต้กล้อง — ระบบถ่ายเองอยู่แล้ว ปุ่มนี้เป็นทางสำรองเมื่อจับเองไม่ได้ */
+.cfk-cam-btns { display: flex; gap: calc(var(--u) * 1); width: 100%; }
+.cfk-cam-btns .cfk-btn:disabled { opacity: .45; cursor: default; }
+
+@keyframes cfk-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+    .cfk-cam-point, .cfk-guide-phone, .cfk-guide-qr,
+    .cfk-cam[data-state="checking"] .cfk-cam-msg .cfk-ic { animation: none; }
+}
+
 </style>
 
 <div id="cfkFrame"><div id="cfkStage"></div></div>
@@ -1604,6 +1761,20 @@ window.showToast = function (m) { if (window.CFKiosk) CFKiosk.toast(m, 2400); };
     }
 
     /**
+     * การตรวจสลิปด้วยกล้องคีออสก์ (§14, §17)
+     * ค่าเริ่ม review — เอกสาร §15 ให้ OCR เป็นหลักฐานประกอบ ไม่ใช่ตัวตัดสินเดียว
+     * ร้านที่วัดความแม่นกับสลิปจริงแล้วค่อยเปิด auto เอง
+     */
+    const CF_SLIP_MODES = [
+        { v: 'review', label: 'ให้แคชเชียร์ยืนยัน' },
+        { v: 'auto',   label: 'ผ่านแล้วส่งครัวเลย' },
+        { v: 'off',    label: 'ปิดกล้อง' },
+    ];
+    function CF_SLIP_MODE(s) {
+        return (s && CF_SLIP_MODES.some((m) => m.v === s.slipMode)) ? s.slipMode : 'review';
+    }
+
+    /**
      * ค่าเริ่มต้นของคีออสก์ — ประกาศที่เดียว ใช้ทั้งหน้าคีออสก์และหน้าตั้งค่าหลังบ้าน
      * อ่านผ่านตัว merge เสมอ ฐานข้อมูลเก่าที่ยังไม่มีคีย์จึงไม่พัง
      */
@@ -1626,7 +1797,7 @@ window.showToast = function (m) { if (window.CFKiosk) CFKiosk.toast(m, 2400); };
     return {
         CF_STATIONS, CF_SERVE, CF_SERVE_ORDER, CF_STATUS,
         CF_DINING, CF_DINING_MODES, CF_DINING_MODE,
-        CF_KIOSK_DEFAULTS, CF_KIOSK_SIZES,
+        CF_KIOSK_DEFAULTS, CF_KIOSK_SIZES, CF_SLIP_MODES, CF_SLIP_MODE,
     };
 });
 
@@ -2335,6 +2506,7 @@ function CF_SEED(now) {
             taxId: '0835566001234',
             vatPercent: 7,
             qrTimeoutSec: 60,
+            slipMode: 'review',             // review | auto | off — ดู CF_SLIP_MODES
             cashMode: 'A',
             kdsWarnMin: 3,
             kdsDangerMin: 6,
@@ -3277,6 +3449,7 @@ const CFKioskArt = {
         cart:     '<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>',
         cash:     '<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/>',
         qr:       '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 19h2v2h-2zM14 19h2v2h-2zM19 14h2v2h-2z"/>',
+        camera:   '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/>',
         timer:    '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/>',
         alert:    '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/>',
         chef:     '<path d="M6 13.9A4 4 0 0 1 7.4 6a5.1 5.1 0 0 1 1.1-1.5 5 5 0 0 1 7 0A5.1 5.1 0 0 1 16.6 6 4 4 0 0 1 18 13.9V21H6Z"/><path d="M6 17h12"/>',
@@ -3284,6 +3457,34 @@ const CFKioskArt = {
         trash:    '<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',
         next:     '<path d="m9 18 6-6-6-6"/>',
         store:    '<path d="M3 9 5 3h14l2 6"/><path d="M4 9h16v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9Z"/><path d="M9 21v-6h6v6"/>',
+    },
+
+    /**
+     * ภาพตัวอย่าง "ยกมือถือที่เปิดสลิปไว้เข้าหากล้อง" — วางทับภาพกล้องจริง
+     * ลูกค้าเห็นท่าที่ถูกในตำแหน่งเดียวกับที่ต้องทำจริง ไม่ต้องแปลจากรูปที่อยู่ที่อื่น
+     * mini-QR มุมล่างเน้นสีไว้ เพราะเป็นส่วนที่ระบบใช้จับว่ามีสลิปอยู่หน้ากล้อง
+     */
+    slipGuide() {
+        return `<svg class="cfk-guide-phone" viewBox="0 0 120 200" aria-hidden="true">
+            <rect x="4" y="4" width="112" height="192" rx="16" fill="#1f2937"/>
+            <rect x="11" y="16" width="98" height="168" rx="6" fill="#fff"/>
+            <rect x="11" y="16" width="98" height="22" rx="6" fill="#06C755"/>
+            <rect x="11" y="30" width="98" height="8" fill="#06C755"/>
+            <circle cx="60" cy="56" r="9" fill="#E8F9EE"/>
+            <path d="m55 56 4 4 7-8" fill="none" stroke="#06C755" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="22" y="72" width="76" height="5" rx="2.5" fill="#d1d5db"/>
+            <rect x="22" y="83" width="54" height="5" rx="2.5" fill="#e5e7eb"/>
+            <rect x="22" y="94" width="64" height="5" rx="2.5" fill="#e5e7eb"/>
+            <rect x="22" y="110" width="30" height="4" rx="2" fill="#e5e7eb"/>
+            <rect x="22" y="118" width="52" height="9" rx="3" fill="#111"/>
+            <rect x="22" y="134" width="44" height="4" rx="2" fill="#e5e7eb"/>
+            <g class="cfk-guide-qr">
+                <rect x="74" y="142" width="30" height="30" rx="3" fill="none" stroke="#06C755" stroke-width="2.5"/>
+                <path fill="#111" d="M78 146h8v8h-8zM92 146h8v8h-8zM78 160h8v8h-8zM89 157h3v3h-3zM94 160h6v3h-6zM92 165h3v3h-3zM97 165h3v3h-3z"/>
+            </g>
+            <rect x="46" y="8" width="28" height="4" rx="2" fill="#374151"/>
+        </svg>`;
     },
 
     /** คืน <svg> เป็น string — ขนาดคุมด้วย CSS ผ่านคลาส */
@@ -3381,6 +3582,14 @@ const CFKiosk = {
         this.applyOrientation();
         clearTimeout(this._remoteT);
         this._remoteT = setTimeout(() => {
+            // แคชเชียร์ยืนยันการชำระให้แล้วระหว่างลูกค้ายังยืนอยู่หน้า QR → ไปหน้าจบเลย
+            if (this.state.screen === 'qr' && !this._camBusy) {
+                const o = CFStore.byId('orders', this.state.orderId);
+                if (o && ['PAID', 'SENT_TO_KITCHEN'].includes(o.status)) {
+                    this.go('done', { kind: 'PAID' });
+                    return;
+                }
+            }
             if (['attract', 'menu', 'cart'].includes(this.state.screen)) this.render();
             else this.state.dirty = true;
         }, 300);
@@ -3390,6 +3599,7 @@ const CFKiosk = {
        ROUTER
        ══════════════════════════════════════════════════════ */
     go(name, params) {
+        if (this.state.screen === 'qr' && name !== 'qr') this.camStop();
         if (this.state.screen && name !== this.state.screen) this.state.stack.push(this.state.screen);
         this.state.screen = name;
         this.state.params = params || {};
@@ -3406,6 +3616,7 @@ const CFKiosk = {
 
     reset() {
         clearTimeout(this._idle); clearInterval(this._qr); clearInterval(this._doneT);
+        this.camStop();
         this.state.stack = [];
         this.state.cart = [];
         this.state.line = null;
@@ -3749,7 +3960,7 @@ const CFKiosk = {
                 ${serveBlock}
                 ${optBlock || '<div class="cfk-note">เมนูนี้ไม่มีตัวเลือกเพิ่มเติม</div>'}
                 ${hiddenNote}
-                <div class="cfk-optgroup">
+                <div class="cfk-optgroup cfk-optgroup-qty">
                     <div class="cfk-optgroup-head"><b>จำนวน</b></div>
                     <div class="cfk-qty">
                         <button onclick="CFKiosk.addQty(-1)" ${L.qty <= 1 ? 'disabled' : ''}
@@ -4078,37 +4289,99 @@ const CFKiosk = {
         }
     },
 
-    /* ── QR + นับถอยหลัง (§14, §16) ── */
+    /* ── QR + นับถอยหลัง + กล้องตรวจสลิป (§14, §16, §17) ──
+       หน้าเดียวจบ: [QR | ภาพตัวอย่างวิธียกสลิป] → กล้องจริง + ปุ่มถ่าย/ถ่ายใหม่
+       ระบบยังจับสลิปและตรวจเองอัตโนมัติ (§17) — ปุ่มเป็นทางสำรองเมื่อจับเองไม่ได้ */
     screen_qr() {
         const o = CFStore.byId('orders', this.state.orderId);
         const sec = CFStore.settings().qrTimeoutSec || 60;
+        const cam = this.useCam();
+        const demo = !this.canQr();
+        const showCam = cam || demo;
         // ต่อกับเซิร์ฟเวอร์จริง → ขอ QR ที่ผูกยอดไว้แล้ว · โหมดเดโม → กล่องจำลองเหมือนเดิม
-        setTimeout(() => (this.canQr() ? this.loadQr() : this.startQr(sec)), 0);
+        setTimeout(() => {
+            if (this.canQr()) this.loadQr(); else this.startQr(sec);
+            if (cam) this.camStart();
+        }, 0);
+
+        // ภาพตัวอย่างวางข้าง QR — ลูกค้าเห็นท่าที่ถูกตั้งแต่ตอนกำลังสแกนจ่าย
+        const guide = showCam ? `
+                    <div class="cfk-guide" aria-hidden="true">
+                        <div class="cfk-guide-title">โอนแล้ว ยกสลิปแบบนี้</div>
+                        <div class="cfk-guide-stage">
+                            <div class="cfk-guide-aim"><i></i><i></i><i></i><i></i></div>
+                            ${CFKioskArt.slipGuide()}
+                        </div>
+                        <div class="cfk-guide-tips">
+                            <span>หันจอสลิปเข้ากล้อง</span>
+                            <span>ห่างราว 1 คืบ</span>
+                            <span>ให้เห็น QR มุมสลิป</span>
+                        </div>
+                    </div>` : '';
+
+        // ตัวชี้ลอยพาสายตาลงมาที่กล้อง — ลูกค้าเพิ่งจ่ายเสร็จ มักมองแต่มือถือตัวเอง
+        const pointer = `
+                <div class="cfk-cam-point" aria-hidden="true">
+                    <span>ยกสลิปตรงนี้</span>
+                    <svg viewBox="0 0 24 24"><path d="M12 4v15M5 12l7 7 7-7" fill="none" stroke="currentColor"
+                         stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>`;
+
+        const camBox = demo ? `${pointer}
+                <div class="cfk-cam" data-state="demo">
+                    <div class="cfk-cam-msg">${CFKioskArt.icon('camera')}
+                        <span>กล้องตรวจสลิปใช้ได้เมื่อต่อเซิร์ฟเวอร์ในร้าน</span></div>
+                </div>`
+            : cam ? `${pointer}
+                <div class="cfk-cam" id="cfkCam" data-state="starting">
+                    <video id="cfkCamVideo" autoplay muted playsinline></video>
+                    <img id="cfkCamShot" alt="">
+                    <div class="cfk-cam-aim"><i></i><i></i><i></i><i></i></div>
+                    <div class="cfk-cam-msg" id="cfkCamMsg">${CFKioskArt.icon('camera')}
+                        <span>กำลังเปิดกล้อง…</span></div>
+                </div>
+                <div class="cfk-cam-btns">
+                    <button class="cfk-btn cfk-btn-ghost" id="cfkCamRetake" disabled
+                            onclick="CFKiosk.camRetake()">ถ่ายใหม่</button>
+                    <button class="cfk-btn cfk-btn-primary cfk-btn-grow" id="cfkCamSnap" disabled
+                            onclick="CFKiosk.camSnap()">${CFKioskArt.icon('camera')} ถ่ายภาพ</button>
+                </div>` : '';
+
         return `
         ${this.topHtml({ title: 'สแกนเพื่อชำระเงิน', sub: 'ออเดอร์ ' + o.orderNo })}
         <div style="display:grid;grid-template-rows:1fr auto;min-height:0">
-            <div class="cfk-center">
-                <div class="cfk-qr" id="cfkQrBox">
-                    ${CFKioskArt.icon('qr')}
-                    <span>${this.canQr() ? 'กำลังสร้าง QR…' : 'QR จำลองสำหรับเดโม'}</span>
+            <div class="cfk-center cfk-paygrid ${showCam ? 'has-cam' : ''}">
+                <div class="cfk-payrow">
+                    <div class="cfk-paycol">
+                        <div class="cfk-qr" id="cfkQrBox">
+                            ${CFKioskArt.icon('qr')}
+                            <span>${this.canQr() ? 'กำลังสร้าง QR…' : 'QR จำลองสำหรับเดโม'}</span>
+                        </div>
+                        <div class="cfk-done-no cfk-payamt">฿${CFApp.money(o.total)}</div>
+                        <div class="cfk-note cfk-note-ok">
+                            ${CFKioskArt.icon('timer')}
+                            <span>เหลือเวลา <b class="cfk-countdown" id="cfkLeft">${sec}</b> วินาที</span>
+                        </div>
+                    </div>
+                    ${guide}
                 </div>
-                <div class="cfk-done-no" style="font-size:calc(var(--u)*5)">฿${CFApp.money(o.total)}</div>
-                <div class="cfk-note cfk-note-ok">
-                    ${CFKioskArt.icon('timer')}
-                    <span>เหลือเวลา <b class="cfk-countdown" id="cfkLeft">${sec}</b> วินาที</span>
-                </div>
+                ${showCam ? `<div class="cfk-paycol cfk-camcol">${camBox}</div>` : ''}
             </div>
             <div class="cfk-actionbar">
-                <button class="cfk-btn cfk-btn-ghost" onclick="CFKiosk.qrTimeout()">แจ้งพนักงาน</button>
-                <button class="cfk-btn cfk-btn-primary cfk-btn-grow" onclick="CFKiosk.qrPaid()">
+                <button class="cfk-btn cfk-btn-ghost ${cam ? 'cfk-btn-grow' : ''}"
+                        onclick="CFKiosk.qrTimeout()">แจ้งพนักงาน</button>
+                ${cam ? '' : `<button class="cfk-btn cfk-btn-primary cfk-btn-grow" onclick="CFKiosk.qrPaid()">
                     ${CFKioskArt.icon('check')} ${this.canQr() ? 'โอนแล้ว' : 'จำลองว่าชำระแล้ว'}
-                </button>
+                </button>`}
             </div>
         </div>`;
     },
 
     /** มีเซิร์ฟเวอร์จริงให้ออก QR ไหม — อาร์ติแฟกต์/เดโมไม่มี */
     canQr() { return !!(window.CFStore && CFStore.mode === 'api'); },
+
+    /** ใช้กล้องตรวจสลิปไหม — ต้องมีเซิร์ฟเวอร์ (OCR อยู่ที่นั่น) และร้านไม่ได้ปิดไว้ */
+    useCam() { return this.canQr() && CF_SLIP_MODE(CFStore.settings()) !== 'off'; },
 
     /**
      * ขอ QR ที่ผูกยอดจากเซิร์ฟเวอร์
@@ -4120,9 +4393,9 @@ const CFKiosk = {
             const r = await CFApi.post('/api/orders/' +
                 encodeURIComponent(this.state.orderId) + '/qr', {});
             if (!box) return;
+            this._qrPayload = r.payload;
             box.classList.add('has-qr');
-            box.innerHTML = '<div class="cfk-qr-img">' + r.svg + '</div>' +
-                '<span>สแกนด้วยแอปธนาคาร · ยอดขึ้นให้อัตโนมัติ</span>';
+            box.innerHTML = '<div class="cfk-qr-img">' + r.svg + '</div>';
             // นับถอยหลังจากเวลาหมดอายุจริงของเซิร์ฟเวอร์ ไม่ใช่ค่าคงที่ฝั่งเบราว์เซอร์
             this.startQr(Math.max(1, Math.round((new Date(r.expiresAt) - Date.now()) / 1000)));
         } catch (err) {
@@ -4133,28 +4406,216 @@ const CFKiosk = {
             }
             // ออก QR ไม่ได้ก็ต้องขายต่อได้ — ส่งให้แคชเชียร์จัดการแทน ไม่ใช่ค้างคาหน้าจอ
             clearInterval(this._qr);
+            this.camStop();
         }
     },
 
     startQr(sec) {
         clearInterval(this._qr);
-        let left = sec;
+        this._qrLeft = sec;
         const el0 = document.getElementById('cfkLeft');
-        if (el0) el0.textContent = left;
+        if (el0) el0.textContent = sec;
         this._qr = setInterval(() => {
-            left--;
+            this._qrLeft--;
             const el = document.getElementById('cfkLeft');
-            if (el) el.textContent = Math.max(0, left);
-            if (left <= 0) { clearInterval(this._qr); this.qrTimeout(); }
+            if (el) el.textContent = Math.max(0, this._qrLeft);
+            if (this._qrLeft <= 0) { clearInterval(this._qr); this.qrTimeout(); }
         }, 1000);
     },
 
+    /* ── กล้องตรวจสลิป ─────────────────────────────────────
+       เบราว์เซอร์ทำแค่ "รู้ว่ามีสลิปอยู่หน้ากล้อง" แล้วถ่ายส่งไป
+       การอ่านยอดและตัดสินว่าจ่ายแล้วอยู่ที่เซิร์ฟเวอร์ทั้งหมด —
+       ถ้าคีออสก์เป็นคนบอกว่า "ผ่าน" ใครก็ปลอม request ได้
+
+       จับสลิปจาก mini-QR ที่ทุกธนาคารพิมพ์ไว้บนสลิป: เจอ QR ที่ไม่ใช่ของร้าน
+       ติดกัน 2 เฟรม = สลิปนิ่งและคมพอให้ OCR อ่านได้ → ถ่ายภาพเต็มความละเอียด */
+    CAM_SCAN_MS: 280,
+    CAM_HITS: 2,
+    CAM_RETRY_MS: 5000,         // โชว์เหตุผลที่ไม่ผ่านนานพอให้อ่าน แล้วกลับไปจับเอง (กด "ถ่ายใหม่" ข้ามได้)
+
+    camSet(state, msg, icon) {
+        const box = document.getElementById('cfkCam');
+        if (!box) return;
+        box.dataset.state = state;
+        const m = document.getElementById('cfkCamMsg');
+        if (m) m.innerHTML = (icon ? CFKioskArt.icon(icon) : '') + '<span>' + msg + '</span>';
+        // ถ่ายภาพ: ได้เฉพาะตอนกล้องกำลังมองหา · ถ่ายใหม่: หลังตรวจไม่ผ่าน/ส่งไม่สำเร็จ
+        const snap = document.getElementById('cfkCamSnap');
+        const again = document.getElementById('cfkCamRetake');
+        if (snap) snap.disabled = state !== 'scan';
+        if (again) again.disabled = state !== 'fail';
+    },
+
+    /** ถ่ายใหม่ — ไม่ต้องรออ่านเหตุผลจนหมดเวลา กลับไปที่ภาพสดทันที */
+    camRetake() {
+        clearTimeout(this._camRetryT);
+        if (this.state.screen === 'qr' && this._camStream && !this._camBusy) this.camScan();
+    },
+
+    async camStart() {
+        this.camStop();
+        const token = this._camToken = {};
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            // http:// ที่ไม่ใช่ localhost เบราว์เซอร์ไม่ให้ใช้กล้องเลย (ต้อง HTTPS)
+            this.camSet('nocam', 'เครื่องนี้ใช้กล้องไม่ได้<br>โอนแล้วกรุณากด "แจ้งพนักงาน"', 'alert');
+            return;
+        }
+        try {
+            const [stream] = await Promise.all([
+                navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false,
+                }),
+                this.loadJsQR(),
+            ]);
+            if (token !== this._camToken) { stream.getTracks().forEach((t) => t.stop()); return; }
+            this._camStream = stream;
+            const v = document.getElementById('cfkCamVideo');
+            if (!v) { this.camStop(); return; }
+            v.srcObject = stream;
+            await v.play().catch(() => {});
+            this.camScan();
+        } catch (err) {
+            if (token !== this._camToken) return;
+            console.warn('[kiosk] camera', err);
+            this.camSet('nocam', 'เปิดกล้องไม่ได้<br>โอนแล้วกรุณากด "แจ้งพนักงาน"', 'alert');
+        }
+    },
+
+    /** jsQR โหลดเฉพาะตอนใช้ — หน้าอื่นของคีออสก์และอาร์ติแฟกต์ไม่ต้องแบก 250 KB นี้ */
+    loadJsQR() {
+        if (window.jsQR) return Promise.resolve();
+        if (!this._jsqrP) {
+            this._jsqrP = new Promise((ok, fail) => {
+                const s = document.createElement('script');
+                s.src = 'vendor/jsQR.js';
+                s.onload = ok;
+                s.onerror = () => { this._jsqrP = null; fail(new Error('โหลด jsQR ไม่ได้')); };
+                document.head.appendChild(s);
+            });
+        }
+        return this._jsqrP;
+    },
+
+    camScan() {
+        clearInterval(this._camT);
+        this._camHits = 0;
+        this.camSet('scan', 'วางหน้าจอสลิปในกรอบ — ระบบถ่ายให้เอง', 'camera');
+
+        const cv = document.createElement('canvas');
+        const g = cv.getContext('2d', { willReadFrequently: true });
+        this._camT = setInterval(() => {
+            const v = document.getElementById('cfkCamVideo');
+            const box = document.getElementById('cfkCam');
+            if (!v || !box) { this.camStop(); return; }
+            if (box.dataset.state !== 'scan' || !v.videoWidth) return;
+
+            // ย่อก่อนหา — ความละเอียดเต็มช้าเกินไปสำหรับรอบละ ~300ms
+            const s = Math.min(1, 960 / v.videoWidth);
+            cv.width = Math.round(v.videoWidth * s);
+            cv.height = Math.round(v.videoHeight * s);
+            g.drawImage(v, 0, 0, cv.width, cv.height);
+            const img = g.getImageData(0, 0, cv.width, cv.height);
+            const r = window.jsQR ? jsQR(img.data, cv.width, cv.height,
+                { inversionAttempts: 'dontInvert' }) : null;
+
+            // QR ของร้านเองสะท้อนเข้ากล้องได้ (หรือลูกค้ายกจอ QR ขึ้นมาผิด) — ไม่นับ
+            if (r && r.data && r.data !== this._qrPayload) {
+                this._camHits++;
+                box.classList.add('is-found');
+                if (this._camHits >= this.CAM_HITS) this.camSnap();
+            } else {
+                this._camHits = 0;
+                box.classList.remove('is-found');
+            }
+        }, this.CAM_SCAN_MS);
+    },
+
+    /** ถ่ายเฟรมเต็มความละเอียดแล้วส่งตรวจ — เรียกจากตัวจับอัตโนมัติ หรือปุ่ม "ถ่ายภาพ" */
+    async camSnap() {
+        const v = document.getElementById('cfkCamVideo');
+        const box = document.getElementById('cfkCam');
+        if (!v || !box || !v.videoWidth || this._camBusy) return;
+        this._camBusy = true;
+        clearInterval(this._camT);
+        box.classList.remove('is-found');
+
+        const cv = document.createElement('canvas');
+        cv.width = v.videoWidth;
+        cv.height = v.videoHeight;
+        cv.getContext('2d').drawImage(v, 0, 0);
+        const shot = document.getElementById('cfkCamShot');
+        if (shot) shot.src = cv.toDataURL('image/jpeg', 0.6);
+
+        // หยุดนับถอยหลังระหว่างตรวจ — ลูกค้าจ่ายแล้วต้องไม่หมดเวลาเพราะรอ OCR
+        clearInterval(this._qr);
+        this.camSet('checking', 'กำลังตรวจสอบการชำระเงิน…', 'timer');
+
+        try {
+            const blob = await new Promise((ok) => cv.toBlob(ok, 'image/jpeg', 0.92));
+            const r = await CFApi.upload('/api/orders/' +
+                encodeURIComponent(this.state.orderId) + '/slip', blob, 'slip.jpg');
+            if (this.state.screen !== 'qr') return;
+
+            if (r.outcome === 'PAID') { this.camStop(); this.go('done', { kind: 'PAID' }); return; }
+            if (r.outcome === 'REVIEW') { this.camStop(); this.go('done', { kind: 'REVIEW' }); return; }
+
+            // RETRY — บอกเหตุผลที่อ่านง่าย แล้วกลับไปจับใหม่เอง
+            const bad = (r.checks || []).find((c) => c.level === 'FAIL')
+                || (r.checks || []).find((c) => !c.ok);
+            const why = r.verdict === 'FAIL' && bad ? bad.msg : 'อ่านสลิปไม่ชัด ลองขยับให้ตรงกรอบ';
+            this.camRetry(why + (r.triesLeft ? `<br><small>ลองได้อีก ${r.triesLeft} ครั้ง</small>` : ''));
+        } catch (err) {
+            if (this.state.screen !== 'qr') return;
+            const st = err.data && err.data.orderStatus;
+            // แคชเชียร์ยืนยันไปก่อนแล้ว (ลูกค้าเดินไปเคาน์เตอร์) — ถือว่าจบ
+            if (st === 'PAID' || st === 'SENT_TO_KITCHEN') { this.camStop(); this.go('done', { kind: 'PAID' }); return; }
+            if (st === 'PAYMENT_REVIEW') { this.camStop(); this.go('done', { kind: 'REVIEW' }); return; }
+            this.camRetry(CFApp.esc(err.message || 'ส่งสลิปไม่สำเร็จ'));
+        } finally {
+            this._camBusy = false;
+        }
+    },
+
+    camRetry(msgHtml) {
+        this.camSet('fail', msgHtml, 'alert');
+        if (this._qrLeft > 0) this.startQr(this._qrLeft);
+        clearTimeout(this._camRetryT);
+        this._camRetryT = setTimeout(() => {
+            if (this.state.screen === 'qr' && this._camStream) this.camScan();
+        }, this.CAM_RETRY_MS);
+    },
+
+    /** ปิดกล้องจริง ๆ (ไฟกล้องต้องดับ) — ทุกทางที่ออกจากหน้านี้ต้องผ่านที่นี่ */
+    camStop() {
+        this._camToken = null;
+        clearInterval(this._camT);
+        clearTimeout(this._camRetryT);
+        if (this._camStream) {
+            this._camStream.getTracks().forEach((t) => t.stop());
+            this._camStream = null;
+        }
+    },
+
+    /**
+     * "โอนแล้ว" แบบไม่มีกล้อง — คีออสก์ไม่มีสิทธิ์ตัดสินว่าจ่ายแล้ว (เซิร์ฟเวอร์ปฏิเสธ PAID)
+     * จึงส่งให้แคชเชียร์ตรวจ · โหมดเดโมยังจำลองจ่ายสำเร็จได้เหมือนเดิม
+     */
     async qrPaid() {
         if (this._submitting) return;
         this._submitting = true;
         clearInterval(this._qr);
+        this.camStop();
         this.setBusy(true, 'กำลังยืนยันการชำระ…');
         try {
+            if (this.canQr()) {
+                const ok = await CFOrders.transition(this.state.orderId, 'PAYMENT_REVIEW',
+                    { byId: 'SYSTEM', device: this.state.deviceId,
+                      reason: 'ลูกค้าแจ้งว่าโอนแล้ว (ไม่ได้ตรวจสลิปด้วยกล้อง)' });
+                if (ok === false) { this.toast('ส่งเรื่องให้พนักงานไม่สำเร็จ'); return; }
+                this.go('done', { kind: 'REVIEW' });
+                return;
+            }
             const ok = await CFOrders.transition(this.state.orderId, 'PAID',
                 { byId: 'SYSTEM', device: this.state.deviceId, ref: 'TX' + Date.now(), bank: 'KBANK' });
             if (ok === false) { this.toast('ยืนยันการชำระไม่สำเร็จ'); return; }
@@ -4166,15 +4627,20 @@ const CFKiosk = {
     },
 
     async qrTimeout() {
-        if (this._submitting) return;
+        if (this._submitting || this._camBusy) return;
         this._submitting = true;
         clearInterval(this._qr);
+        this.camStop();
         this.setBusy(true, 'กำลังแจ้งพนักงาน…');
         try {
             const id = this.state.orderId;
+            const o = CFStore.byId('orders', id);
+            // เซิร์ฟเวอร์อาจตัดเวลาไปก่อนแล้ว (ตัวเก็บกวาดทุก 5 วิ) — ข้ามขั้นที่ผ่านมาแล้ว
+            if (!o || o.status === 'WAITING_PAYMENT') {
+                await CFOrders.transition(id, 'PAYMENT_TIMEOUT',
+                    { byId: 'SYSTEM', device: this.state.deviceId });
+            }
             // ต้องรอตัวแรกให้เสร็จก่อน — สองคำสั่งนี้เป็นลำดับ ไม่ใช่ขนาน
-            await CFOrders.transition(id, 'PAYMENT_TIMEOUT',
-                { byId: 'SYSTEM', device: this.state.deviceId });
             await CFOrders.transition(id, 'PAYMENT_REVIEW',
                 { byId: 'SYSTEM', device: this.state.deviceId,
                   reason: 'ลูกค้ากดแจ้งพนักงานจากคีออสก์' });
@@ -4199,6 +4665,7 @@ const CFKiosk = {
             CASH: ['cash', 'cfk-note-warn', 'กรุณาชำระเงิน ฿' + CFApp.money(o.total) + ' ที่เคาน์เตอร์'],
             PAID: ['chef', 'cfk-note-ok', 'ส่งเข้าครัวแล้ว กรุณารอเรียกหมายเลข'],
             TIMEOUT: ['alert', 'cfk-note-warn', 'หากท่านชำระเงินแล้ว กรุณาแจ้งพนักงานที่เคาน์เตอร์'],
+            REVIEW: ['timer', 'cfk-note-warn', 'พนักงานกำลังตรวจสอบสลิป — รอเรียกหมายเลขได้เลย'],
         }[kind];
 
         return `
@@ -4206,8 +4673,8 @@ const CFKiosk = {
             <span>${e(this.diningLabel())}</span></div></div>
         <div style="display:grid;grid-template-rows:1fr auto;min-height:0">
             <div class="cfk-center">
-                <div class="cfk-done-ico ${kind === 'TIMEOUT' ? 'warn' : 'ok'}">
-                    ${CFKioskArt.icon(kind === 'TIMEOUT' ? 'alert' : 'check')}
+                <div class="cfk-done-ico ${kind === 'TIMEOUT' || kind === 'REVIEW' ? 'warn' : 'ok'}">
+                    ${CFKioskArt.icon(kind === 'TIMEOUT' ? 'alert' : kind === 'REVIEW' ? 'timer' : 'check')}
                 </div>
                 <div class="cfk-done-label">หมายเลขออเดอร์ของคุณ</div>
                 <div class="cfk-done-no">${e(o.orderNo)}</div>

@@ -80,6 +80,14 @@ const CFKiosk = {
         this.applyOrientation();
         clearTimeout(this._remoteT);
         this._remoteT = setTimeout(() => {
+            // แคชเชียร์ยืนยันการชำระให้แล้วระหว่างลูกค้ายังยืนอยู่หน้า QR → ไปหน้าจบเลย
+            if (this.state.screen === 'qr' && !this._camBusy) {
+                const o = CFStore.byId('orders', this.state.orderId);
+                if (o && ['PAID', 'SENT_TO_KITCHEN'].includes(o.status)) {
+                    this.go('done', { kind: 'PAID' });
+                    return;
+                }
+            }
             if (['attract', 'menu', 'cart'].includes(this.state.screen)) this.render();
             else this.state.dirty = true;
         }, 300);
@@ -89,6 +97,7 @@ const CFKiosk = {
        ROUTER
        ══════════════════════════════════════════════════════ */
     go(name, params) {
+        if (this.state.screen === 'qr' && name !== 'qr') this.camStop();
         if (this.state.screen && name !== this.state.screen) this.state.stack.push(this.state.screen);
         this.state.screen = name;
         this.state.params = params || {};
@@ -105,6 +114,7 @@ const CFKiosk = {
 
     reset() {
         clearTimeout(this._idle); clearInterval(this._qr); clearInterval(this._doneT);
+        this.camStop();
         this.state.stack = [];
         this.state.cart = [];
         this.state.line = null;
@@ -448,7 +458,7 @@ const CFKiosk = {
                 ${serveBlock}
                 ${optBlock || '<div class="cfk-note">เมนูนี้ไม่มีตัวเลือกเพิ่มเติม</div>'}
                 ${hiddenNote}
-                <div class="cfk-optgroup">
+                <div class="cfk-optgroup cfk-optgroup-qty">
                     <div class="cfk-optgroup-head"><b>จำนวน</b></div>
                     <div class="cfk-qty">
                         <button onclick="CFKiosk.addQty(-1)" ${L.qty <= 1 ? 'disabled' : ''}
@@ -777,37 +787,99 @@ const CFKiosk = {
         }
     },
 
-    /* ── QR + นับถอยหลัง (§14, §16) ── */
+    /* ── QR + นับถอยหลัง + กล้องตรวจสลิป (§14, §16, §17) ──
+       หน้าเดียวจบ: [QR | ภาพตัวอย่างวิธียกสลิป] → กล้องจริง + ปุ่มถ่าย/ถ่ายใหม่
+       ระบบยังจับสลิปและตรวจเองอัตโนมัติ (§17) — ปุ่มเป็นทางสำรองเมื่อจับเองไม่ได้ */
     screen_qr() {
         const o = CFStore.byId('orders', this.state.orderId);
         const sec = CFStore.settings().qrTimeoutSec || 60;
+        const cam = this.useCam();
+        const demo = !this.canQr();
+        const showCam = cam || demo;
         // ต่อกับเซิร์ฟเวอร์จริง → ขอ QR ที่ผูกยอดไว้แล้ว · โหมดเดโม → กล่องจำลองเหมือนเดิม
-        setTimeout(() => (this.canQr() ? this.loadQr() : this.startQr(sec)), 0);
+        setTimeout(() => {
+            if (this.canQr()) this.loadQr(); else this.startQr(sec);
+            if (cam) this.camStart();
+        }, 0);
+
+        // ภาพตัวอย่างวางข้าง QR — ลูกค้าเห็นท่าที่ถูกตั้งแต่ตอนกำลังสแกนจ่าย
+        const guide = showCam ? `
+                    <div class="cfk-guide" aria-hidden="true">
+                        <div class="cfk-guide-title">โอนแล้ว ยกสลิปแบบนี้</div>
+                        <div class="cfk-guide-stage">
+                            <div class="cfk-guide-aim"><i></i><i></i><i></i><i></i></div>
+                            ${CFKioskArt.slipGuide()}
+                        </div>
+                        <div class="cfk-guide-tips">
+                            <span>หันจอสลิปเข้ากล้อง</span>
+                            <span>ห่างราว 1 คืบ</span>
+                            <span>ให้เห็น QR มุมสลิป</span>
+                        </div>
+                    </div>` : '';
+
+        // ตัวชี้ลอยพาสายตาลงมาที่กล้อง — ลูกค้าเพิ่งจ่ายเสร็จ มักมองแต่มือถือตัวเอง
+        const pointer = `
+                <div class="cfk-cam-point" aria-hidden="true">
+                    <span>ยกสลิปตรงนี้</span>
+                    <svg viewBox="0 0 24 24"><path d="M12 4v15M5 12l7 7 7-7" fill="none" stroke="currentColor"
+                         stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>`;
+
+        const camBox = demo ? `${pointer}
+                <div class="cfk-cam" data-state="demo">
+                    <div class="cfk-cam-msg">${CFKioskArt.icon('camera')}
+                        <span>กล้องตรวจสลิปใช้ได้เมื่อต่อเซิร์ฟเวอร์ในร้าน</span></div>
+                </div>`
+            : cam ? `${pointer}
+                <div class="cfk-cam" id="cfkCam" data-state="starting">
+                    <video id="cfkCamVideo" autoplay muted playsinline></video>
+                    <img id="cfkCamShot" alt="">
+                    <div class="cfk-cam-aim"><i></i><i></i><i></i><i></i></div>
+                    <div class="cfk-cam-msg" id="cfkCamMsg">${CFKioskArt.icon('camera')}
+                        <span>กำลังเปิดกล้อง…</span></div>
+                </div>
+                <div class="cfk-cam-btns">
+                    <button class="cfk-btn cfk-btn-ghost" id="cfkCamRetake" disabled
+                            onclick="CFKiosk.camRetake()">ถ่ายใหม่</button>
+                    <button class="cfk-btn cfk-btn-primary cfk-btn-grow" id="cfkCamSnap" disabled
+                            onclick="CFKiosk.camSnap()">${CFKioskArt.icon('camera')} ถ่ายภาพ</button>
+                </div>` : '';
+
         return `
         ${this.topHtml({ title: 'สแกนเพื่อชำระเงิน', sub: 'ออเดอร์ ' + o.orderNo })}
         <div style="display:grid;grid-template-rows:1fr auto;min-height:0">
-            <div class="cfk-center">
-                <div class="cfk-qr" id="cfkQrBox">
-                    ${CFKioskArt.icon('qr')}
-                    <span>${this.canQr() ? 'กำลังสร้าง QR…' : 'QR จำลองสำหรับเดโม'}</span>
+            <div class="cfk-center cfk-paygrid ${showCam ? 'has-cam' : ''}">
+                <div class="cfk-payrow">
+                    <div class="cfk-paycol">
+                        <div class="cfk-qr" id="cfkQrBox">
+                            ${CFKioskArt.icon('qr')}
+                            <span>${this.canQr() ? 'กำลังสร้าง QR…' : 'QR จำลองสำหรับเดโม'}</span>
+                        </div>
+                        <div class="cfk-done-no cfk-payamt">฿${CFApp.money(o.total)}</div>
+                        <div class="cfk-note cfk-note-ok">
+                            ${CFKioskArt.icon('timer')}
+                            <span>เหลือเวลา <b class="cfk-countdown" id="cfkLeft">${sec}</b> วินาที</span>
+                        </div>
+                    </div>
+                    ${guide}
                 </div>
-                <div class="cfk-done-no" style="font-size:calc(var(--u)*5)">฿${CFApp.money(o.total)}</div>
-                <div class="cfk-note cfk-note-ok">
-                    ${CFKioskArt.icon('timer')}
-                    <span>เหลือเวลา <b class="cfk-countdown" id="cfkLeft">${sec}</b> วินาที</span>
-                </div>
+                ${showCam ? `<div class="cfk-paycol cfk-camcol">${camBox}</div>` : ''}
             </div>
             <div class="cfk-actionbar">
-                <button class="cfk-btn cfk-btn-ghost" onclick="CFKiosk.qrTimeout()">แจ้งพนักงาน</button>
-                <button class="cfk-btn cfk-btn-primary cfk-btn-grow" onclick="CFKiosk.qrPaid()">
+                <button class="cfk-btn cfk-btn-ghost ${cam ? 'cfk-btn-grow' : ''}"
+                        onclick="CFKiosk.qrTimeout()">แจ้งพนักงาน</button>
+                ${cam ? '' : `<button class="cfk-btn cfk-btn-primary cfk-btn-grow" onclick="CFKiosk.qrPaid()">
                     ${CFKioskArt.icon('check')} ${this.canQr() ? 'โอนแล้ว' : 'จำลองว่าชำระแล้ว'}
-                </button>
+                </button>`}
             </div>
         </div>`;
     },
 
     /** มีเซิร์ฟเวอร์จริงให้ออก QR ไหม — อาร์ติแฟกต์/เดโมไม่มี */
     canQr() { return !!(window.CFStore && CFStore.mode === 'api'); },
+
+    /** ใช้กล้องตรวจสลิปไหม — ต้องมีเซิร์ฟเวอร์ (OCR อยู่ที่นั่น) และร้านไม่ได้ปิดไว้ */
+    useCam() { return this.canQr() && CF_SLIP_MODE(CFStore.settings()) !== 'off'; },
 
     /**
      * ขอ QR ที่ผูกยอดจากเซิร์ฟเวอร์
@@ -819,9 +891,9 @@ const CFKiosk = {
             const r = await CFApi.post('/api/orders/' +
                 encodeURIComponent(this.state.orderId) + '/qr', {});
             if (!box) return;
+            this._qrPayload = r.payload;
             box.classList.add('has-qr');
-            box.innerHTML = '<div class="cfk-qr-img">' + r.svg + '</div>' +
-                '<span>สแกนด้วยแอปธนาคาร · ยอดขึ้นให้อัตโนมัติ</span>';
+            box.innerHTML = '<div class="cfk-qr-img">' + r.svg + '</div>';
             // นับถอยหลังจากเวลาหมดอายุจริงของเซิร์ฟเวอร์ ไม่ใช่ค่าคงที่ฝั่งเบราว์เซอร์
             this.startQr(Math.max(1, Math.round((new Date(r.expiresAt) - Date.now()) / 1000)));
         } catch (err) {
@@ -832,28 +904,216 @@ const CFKiosk = {
             }
             // ออก QR ไม่ได้ก็ต้องขายต่อได้ — ส่งให้แคชเชียร์จัดการแทน ไม่ใช่ค้างคาหน้าจอ
             clearInterval(this._qr);
+            this.camStop();
         }
     },
 
     startQr(sec) {
         clearInterval(this._qr);
-        let left = sec;
+        this._qrLeft = sec;
         const el0 = document.getElementById('cfkLeft');
-        if (el0) el0.textContent = left;
+        if (el0) el0.textContent = sec;
         this._qr = setInterval(() => {
-            left--;
+            this._qrLeft--;
             const el = document.getElementById('cfkLeft');
-            if (el) el.textContent = Math.max(0, left);
-            if (left <= 0) { clearInterval(this._qr); this.qrTimeout(); }
+            if (el) el.textContent = Math.max(0, this._qrLeft);
+            if (this._qrLeft <= 0) { clearInterval(this._qr); this.qrTimeout(); }
         }, 1000);
     },
 
+    /* ── กล้องตรวจสลิป ─────────────────────────────────────
+       เบราว์เซอร์ทำแค่ "รู้ว่ามีสลิปอยู่หน้ากล้อง" แล้วถ่ายส่งไป
+       การอ่านยอดและตัดสินว่าจ่ายแล้วอยู่ที่เซิร์ฟเวอร์ทั้งหมด —
+       ถ้าคีออสก์เป็นคนบอกว่า "ผ่าน" ใครก็ปลอม request ได้
+
+       จับสลิปจาก mini-QR ที่ทุกธนาคารพิมพ์ไว้บนสลิป: เจอ QR ที่ไม่ใช่ของร้าน
+       ติดกัน 2 เฟรม = สลิปนิ่งและคมพอให้ OCR อ่านได้ → ถ่ายภาพเต็มความละเอียด */
+    CAM_SCAN_MS: 280,
+    CAM_HITS: 2,
+    CAM_RETRY_MS: 5000,         // โชว์เหตุผลที่ไม่ผ่านนานพอให้อ่าน แล้วกลับไปจับเอง (กด "ถ่ายใหม่" ข้ามได้)
+
+    camSet(state, msg, icon) {
+        const box = document.getElementById('cfkCam');
+        if (!box) return;
+        box.dataset.state = state;
+        const m = document.getElementById('cfkCamMsg');
+        if (m) m.innerHTML = (icon ? CFKioskArt.icon(icon) : '') + '<span>' + msg + '</span>';
+        // ถ่ายภาพ: ได้เฉพาะตอนกล้องกำลังมองหา · ถ่ายใหม่: หลังตรวจไม่ผ่าน/ส่งไม่สำเร็จ
+        const snap = document.getElementById('cfkCamSnap');
+        const again = document.getElementById('cfkCamRetake');
+        if (snap) snap.disabled = state !== 'scan';
+        if (again) again.disabled = state !== 'fail';
+    },
+
+    /** ถ่ายใหม่ — ไม่ต้องรออ่านเหตุผลจนหมดเวลา กลับไปที่ภาพสดทันที */
+    camRetake() {
+        clearTimeout(this._camRetryT);
+        if (this.state.screen === 'qr' && this._camStream && !this._camBusy) this.camScan();
+    },
+
+    async camStart() {
+        this.camStop();
+        const token = this._camToken = {};
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            // http:// ที่ไม่ใช่ localhost เบราว์เซอร์ไม่ให้ใช้กล้องเลย (ต้อง HTTPS)
+            this.camSet('nocam', 'เครื่องนี้ใช้กล้องไม่ได้<br>โอนแล้วกรุณากด "แจ้งพนักงาน"', 'alert');
+            return;
+        }
+        try {
+            const [stream] = await Promise.all([
+                navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false,
+                }),
+                this.loadJsQR(),
+            ]);
+            if (token !== this._camToken) { stream.getTracks().forEach((t) => t.stop()); return; }
+            this._camStream = stream;
+            const v = document.getElementById('cfkCamVideo');
+            if (!v) { this.camStop(); return; }
+            v.srcObject = stream;
+            await v.play().catch(() => {});
+            this.camScan();
+        } catch (err) {
+            if (token !== this._camToken) return;
+            console.warn('[kiosk] camera', err);
+            this.camSet('nocam', 'เปิดกล้องไม่ได้<br>โอนแล้วกรุณากด "แจ้งพนักงาน"', 'alert');
+        }
+    },
+
+    /** jsQR โหลดเฉพาะตอนใช้ — หน้าอื่นของคีออสก์และอาร์ติแฟกต์ไม่ต้องแบก 250 KB นี้ */
+    loadJsQR() {
+        if (window.jsQR) return Promise.resolve();
+        if (!this._jsqrP) {
+            this._jsqrP = new Promise((ok, fail) => {
+                const s = document.createElement('script');
+                s.src = 'vendor/jsQR.js';
+                s.onload = ok;
+                s.onerror = () => { this._jsqrP = null; fail(new Error('โหลด jsQR ไม่ได้')); };
+                document.head.appendChild(s);
+            });
+        }
+        return this._jsqrP;
+    },
+
+    camScan() {
+        clearInterval(this._camT);
+        this._camHits = 0;
+        this.camSet('scan', 'วางหน้าจอสลิปในกรอบ — ระบบถ่ายให้เอง', 'camera');
+
+        const cv = document.createElement('canvas');
+        const g = cv.getContext('2d', { willReadFrequently: true });
+        this._camT = setInterval(() => {
+            const v = document.getElementById('cfkCamVideo');
+            const box = document.getElementById('cfkCam');
+            if (!v || !box) { this.camStop(); return; }
+            if (box.dataset.state !== 'scan' || !v.videoWidth) return;
+
+            // ย่อก่อนหา — ความละเอียดเต็มช้าเกินไปสำหรับรอบละ ~300ms
+            const s = Math.min(1, 960 / v.videoWidth);
+            cv.width = Math.round(v.videoWidth * s);
+            cv.height = Math.round(v.videoHeight * s);
+            g.drawImage(v, 0, 0, cv.width, cv.height);
+            const img = g.getImageData(0, 0, cv.width, cv.height);
+            const r = window.jsQR ? jsQR(img.data, cv.width, cv.height,
+                { inversionAttempts: 'dontInvert' }) : null;
+
+            // QR ของร้านเองสะท้อนเข้ากล้องได้ (หรือลูกค้ายกจอ QR ขึ้นมาผิด) — ไม่นับ
+            if (r && r.data && r.data !== this._qrPayload) {
+                this._camHits++;
+                box.classList.add('is-found');
+                if (this._camHits >= this.CAM_HITS) this.camSnap();
+            } else {
+                this._camHits = 0;
+                box.classList.remove('is-found');
+            }
+        }, this.CAM_SCAN_MS);
+    },
+
+    /** ถ่ายเฟรมเต็มความละเอียดแล้วส่งตรวจ — เรียกจากตัวจับอัตโนมัติ หรือปุ่ม "ถ่ายภาพ" */
+    async camSnap() {
+        const v = document.getElementById('cfkCamVideo');
+        const box = document.getElementById('cfkCam');
+        if (!v || !box || !v.videoWidth || this._camBusy) return;
+        this._camBusy = true;
+        clearInterval(this._camT);
+        box.classList.remove('is-found');
+
+        const cv = document.createElement('canvas');
+        cv.width = v.videoWidth;
+        cv.height = v.videoHeight;
+        cv.getContext('2d').drawImage(v, 0, 0);
+        const shot = document.getElementById('cfkCamShot');
+        if (shot) shot.src = cv.toDataURL('image/jpeg', 0.6);
+
+        // หยุดนับถอยหลังระหว่างตรวจ — ลูกค้าจ่ายแล้วต้องไม่หมดเวลาเพราะรอ OCR
+        clearInterval(this._qr);
+        this.camSet('checking', 'กำลังตรวจสอบการชำระเงิน…', 'timer');
+
+        try {
+            const blob = await new Promise((ok) => cv.toBlob(ok, 'image/jpeg', 0.92));
+            const r = await CFApi.upload('/api/orders/' +
+                encodeURIComponent(this.state.orderId) + '/slip', blob, 'slip.jpg');
+            if (this.state.screen !== 'qr') return;
+
+            if (r.outcome === 'PAID') { this.camStop(); this.go('done', { kind: 'PAID' }); return; }
+            if (r.outcome === 'REVIEW') { this.camStop(); this.go('done', { kind: 'REVIEW' }); return; }
+
+            // RETRY — บอกเหตุผลที่อ่านง่าย แล้วกลับไปจับใหม่เอง
+            const bad = (r.checks || []).find((c) => c.level === 'FAIL')
+                || (r.checks || []).find((c) => !c.ok);
+            const why = r.verdict === 'FAIL' && bad ? bad.msg : 'อ่านสลิปไม่ชัด ลองขยับให้ตรงกรอบ';
+            this.camRetry(why + (r.triesLeft ? `<br><small>ลองได้อีก ${r.triesLeft} ครั้ง</small>` : ''));
+        } catch (err) {
+            if (this.state.screen !== 'qr') return;
+            const st = err.data && err.data.orderStatus;
+            // แคชเชียร์ยืนยันไปก่อนแล้ว (ลูกค้าเดินไปเคาน์เตอร์) — ถือว่าจบ
+            if (st === 'PAID' || st === 'SENT_TO_KITCHEN') { this.camStop(); this.go('done', { kind: 'PAID' }); return; }
+            if (st === 'PAYMENT_REVIEW') { this.camStop(); this.go('done', { kind: 'REVIEW' }); return; }
+            this.camRetry(CFApp.esc(err.message || 'ส่งสลิปไม่สำเร็จ'));
+        } finally {
+            this._camBusy = false;
+        }
+    },
+
+    camRetry(msgHtml) {
+        this.camSet('fail', msgHtml, 'alert');
+        if (this._qrLeft > 0) this.startQr(this._qrLeft);
+        clearTimeout(this._camRetryT);
+        this._camRetryT = setTimeout(() => {
+            if (this.state.screen === 'qr' && this._camStream) this.camScan();
+        }, this.CAM_RETRY_MS);
+    },
+
+    /** ปิดกล้องจริง ๆ (ไฟกล้องต้องดับ) — ทุกทางที่ออกจากหน้านี้ต้องผ่านที่นี่ */
+    camStop() {
+        this._camToken = null;
+        clearInterval(this._camT);
+        clearTimeout(this._camRetryT);
+        if (this._camStream) {
+            this._camStream.getTracks().forEach((t) => t.stop());
+            this._camStream = null;
+        }
+    },
+
+    /**
+     * "โอนแล้ว" แบบไม่มีกล้อง — คีออสก์ไม่มีสิทธิ์ตัดสินว่าจ่ายแล้ว (เซิร์ฟเวอร์ปฏิเสธ PAID)
+     * จึงส่งให้แคชเชียร์ตรวจ · โหมดเดโมยังจำลองจ่ายสำเร็จได้เหมือนเดิม
+     */
     async qrPaid() {
         if (this._submitting) return;
         this._submitting = true;
         clearInterval(this._qr);
+        this.camStop();
         this.setBusy(true, 'กำลังยืนยันการชำระ…');
         try {
+            if (this.canQr()) {
+                const ok = await CFOrders.transition(this.state.orderId, 'PAYMENT_REVIEW',
+                    { byId: 'SYSTEM', device: this.state.deviceId,
+                      reason: 'ลูกค้าแจ้งว่าโอนแล้ว (ไม่ได้ตรวจสลิปด้วยกล้อง)' });
+                if (ok === false) { this.toast('ส่งเรื่องให้พนักงานไม่สำเร็จ'); return; }
+                this.go('done', { kind: 'REVIEW' });
+                return;
+            }
             const ok = await CFOrders.transition(this.state.orderId, 'PAID',
                 { byId: 'SYSTEM', device: this.state.deviceId, ref: 'TX' + Date.now(), bank: 'KBANK' });
             if (ok === false) { this.toast('ยืนยันการชำระไม่สำเร็จ'); return; }
@@ -865,15 +1125,20 @@ const CFKiosk = {
     },
 
     async qrTimeout() {
-        if (this._submitting) return;
+        if (this._submitting || this._camBusy) return;
         this._submitting = true;
         clearInterval(this._qr);
+        this.camStop();
         this.setBusy(true, 'กำลังแจ้งพนักงาน…');
         try {
             const id = this.state.orderId;
+            const o = CFStore.byId('orders', id);
+            // เซิร์ฟเวอร์อาจตัดเวลาไปก่อนแล้ว (ตัวเก็บกวาดทุก 5 วิ) — ข้ามขั้นที่ผ่านมาแล้ว
+            if (!o || o.status === 'WAITING_PAYMENT') {
+                await CFOrders.transition(id, 'PAYMENT_TIMEOUT',
+                    { byId: 'SYSTEM', device: this.state.deviceId });
+            }
             // ต้องรอตัวแรกให้เสร็จก่อน — สองคำสั่งนี้เป็นลำดับ ไม่ใช่ขนาน
-            await CFOrders.transition(id, 'PAYMENT_TIMEOUT',
-                { byId: 'SYSTEM', device: this.state.deviceId });
             await CFOrders.transition(id, 'PAYMENT_REVIEW',
                 { byId: 'SYSTEM', device: this.state.deviceId,
                   reason: 'ลูกค้ากดแจ้งพนักงานจากคีออสก์' });
@@ -898,6 +1163,7 @@ const CFKiosk = {
             CASH: ['cash', 'cfk-note-warn', 'กรุณาชำระเงิน ฿' + CFApp.money(o.total) + ' ที่เคาน์เตอร์'],
             PAID: ['chef', 'cfk-note-ok', 'ส่งเข้าครัวแล้ว กรุณารอเรียกหมายเลข'],
             TIMEOUT: ['alert', 'cfk-note-warn', 'หากท่านชำระเงินแล้ว กรุณาแจ้งพนักงานที่เคาน์เตอร์'],
+            REVIEW: ['timer', 'cfk-note-warn', 'พนักงานกำลังตรวจสอบสลิป — รอเรียกหมายเลขได้เลย'],
         }[kind];
 
         return `
@@ -905,8 +1171,8 @@ const CFKiosk = {
             <span>${e(this.diningLabel())}</span></div></div>
         <div style="display:grid;grid-template-rows:1fr auto;min-height:0">
             <div class="cfk-center">
-                <div class="cfk-done-ico ${kind === 'TIMEOUT' ? 'warn' : 'ok'}">
-                    ${CFKioskArt.icon(kind === 'TIMEOUT' ? 'alert' : 'check')}
+                <div class="cfk-done-ico ${kind === 'TIMEOUT' || kind === 'REVIEW' ? 'warn' : 'ok'}">
+                    ${CFKioskArt.icon(kind === 'TIMEOUT' ? 'alert' : kind === 'REVIEW' ? 'timer' : 'check')}
                 </div>
                 <div class="cfk-done-label">หมายเลขออเดอร์ของคุณ</div>
                 <div class="cfk-done-no">${e(o.orderNo)}</div>

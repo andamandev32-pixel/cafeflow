@@ -317,6 +317,7 @@ const CFKioskArt = {
         cart:     '<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>',
         cash:     '<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/>',
         qr:       '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 19h2v2h-2zM14 19h2v2h-2zM19 14h2v2h-2z"/>',
+        camera:   '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/>',
         timer:    '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/>',
         alert:    '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/>',
         chef:     '<path d="M6 13.9A4 4 0 0 1 7.4 6a5.1 5.1 0 0 1 1.1-1.5 5 5 0 0 1 7 0A5.1 5.1 0 0 1 16.6 6 4 4 0 0 1 18 13.9V21H6Z"/><path d="M6 17h12"/>',
@@ -324,6 +325,34 @@ const CFKioskArt = {
         trash:    '<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',
         next:     '<path d="m9 18 6-6-6-6"/>',
         store:    '<path d="M3 9 5 3h14l2 6"/><path d="M4 9h16v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9Z"/><path d="M9 21v-6h6v6"/>',
+    },
+
+    /**
+     * ภาพตัวอย่าง "ยกมือถือที่เปิดสลิปไว้เข้าหากล้อง" — วางทับภาพกล้องจริง
+     * ลูกค้าเห็นท่าที่ถูกในตำแหน่งเดียวกับที่ต้องทำจริง ไม่ต้องแปลจากรูปที่อยู่ที่อื่น
+     * mini-QR มุมล่างเน้นสีไว้ เพราะเป็นส่วนที่ระบบใช้จับว่ามีสลิปอยู่หน้ากล้อง
+     */
+    slipGuide() {
+        return `<svg class="cfk-guide-phone" viewBox="0 0 120 200" aria-hidden="true">
+            <rect x="4" y="4" width="112" height="192" rx="16" fill="#1f2937"/>
+            <rect x="11" y="16" width="98" height="168" rx="6" fill="#fff"/>
+            <rect x="11" y="16" width="98" height="22" rx="6" fill="#06C755"/>
+            <rect x="11" y="30" width="98" height="8" fill="#06C755"/>
+            <circle cx="60" cy="56" r="9" fill="#E8F9EE"/>
+            <path d="m55 56 4 4 7-8" fill="none" stroke="#06C755" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="22" y="72" width="76" height="5" rx="2.5" fill="#d1d5db"/>
+            <rect x="22" y="83" width="54" height="5" rx="2.5" fill="#e5e7eb"/>
+            <rect x="22" y="94" width="64" height="5" rx="2.5" fill="#e5e7eb"/>
+            <rect x="22" y="110" width="30" height="4" rx="2" fill="#e5e7eb"/>
+            <rect x="22" y="118" width="52" height="9" rx="3" fill="#111"/>
+            <rect x="22" y="134" width="44" height="4" rx="2" fill="#e5e7eb"/>
+            <g class="cfk-guide-qr">
+                <rect x="74" y="142" width="30" height="30" rx="3" fill="none" stroke="#06C755" stroke-width="2.5"/>
+                <path fill="#111" d="M78 146h8v8h-8zM92 146h8v8h-8zM78 160h8v8h-8zM89 157h3v3h-3zM94 160h6v3h-6zM92 165h3v3h-3zM97 165h3v3h-3z"/>
+            </g>
+            <rect x="46" y="8" width="28" height="4" rx="2" fill="#374151"/>
+        </svg>`;
     },
 
     /** คืน <svg> เป็น string — ขนาดคุมด้วย CSS ผ่านคลาส */

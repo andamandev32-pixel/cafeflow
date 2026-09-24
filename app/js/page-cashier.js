@@ -237,10 +237,12 @@ const CashierPage = {
             contentHtml: `
                 <div class="sip-banner sip-banner-warning" style="margin-bottom:12px">
                     <i data-lucide="alert-triangle" class="icon-sm"></i>
-                    QR หมดเวลาแล้ว ลูกค้าแจ้งว่าชำระเงินเรียบร้อย — ต้องตรวจสอบก่อนยืนยัน
+                    ${o.cancelReason ? e(o.cancelReason)
+                        : 'QR หมดเวลาแล้ว ลูกค้าแจ้งว่าชำระเงินเรียบร้อย'} — ต้องตรวจสอบก่อนยืนยัน
                 </div>
 
                 <div class="ds-section-label">ข้อมูลการชำระที่อ่านได้จากสลิป</div>
+                <div id="rvSlip">
                 <table class="ds-table-grid">
                     <tr><th class="l" style="width:35%">ยอดตามออเดอร์</th><td class="r">${CFApp.money(o.total)}</td></tr>
                     <tr><th class="l">ยอดในสลิป</th><td class="r">${p ? CFApp.money(p.amount) : '—'}</td></tr>
@@ -248,6 +250,7 @@ const CashierPage = {
                     <tr><th class="l">เลขอ้างอิง</th><td class="l">${p && p.ref ? e(p.ref) : '—'}</td></tr>
                     <tr><th class="l">เวลาทำรายการ</th><td class="l">${p && p.txAt ? CFApp.dateTime(p.txAt) : '—'}</td></tr>
                 </table>
+                </div>
 
                 <div class="ds-section-label">รายการ</div>
                 ${this._itemsHtml(orderId)}
@@ -257,7 +260,7 @@ const CashierPage = {
                           placeholder="เช่น ตรวจสลิปจากแอปธนาคารของลูกค้าแล้ว ยอดและเวลาตรงกัน"
                           oninput="CashierPage.onReason(this.value)"></textarea>
                 <div class="ds-chips">
-                    ${['ตรวจสลิปจากมือถือลูกค้าแล้ว ยอดตรง', 'ยืนยันยอดเข้าบัญชีร้านแล้ว', 'ลูกค้าชำระเงินสดแทน']
+                    ${['ตรวจภาพสลิปจากกล้องคีออสก์แล้ว ยอดตรง', 'ตรวจสลิปจากมือถือลูกค้าแล้ว ยอดตรง', 'ยืนยันยอดเข้าบัญชีร้านแล้ว', 'ลูกค้าชำระเงินสดแทน']
                         .map((r) => `<button type="button" class="ds-chip-suggest"
                             onclick="CashierPage.setReason('${e(r)}')">${e(r)}</button>`).join('')}
                 </div>
@@ -277,8 +280,50 @@ const CashierPage = {
                         onclick="CashierPage.confirmOverride()" disabled>
                     <i data-lucide="check" class="icon-sm"></i> ยืนยันการชำระ
                 </button>`,
-            onOpen: () => refreshIcons(),
+            onOpen: () => { refreshIcons(); this.loadSlips(orderId); },
         });
+    },
+
+    /**
+     * ภาพสลิปจากกล้องคีออสก์ + ผลกฎ 4 ข้อ — มีเฉพาะเมื่อต่อเซิร์ฟเวอร์ในร้าน
+     * ไม่มีสลิป (ลูกค้ากดแจ้งพนักงานเอง) → คงตารางเดิมไว้
+     */
+    async loadSlips(orderId) {
+        if (CFStore.mode !== 'api') return;
+        let rows;
+        try { rows = await CFApi.get('/api/orders/' + encodeURIComponent(orderId) + '/slips'); }
+        catch { return; }
+        const box = document.getElementById('rvSlip');
+        if (!box || !rows || !rows.length) return;
+
+        const e = CFApp.esc;
+        const o = CFStore.byId('orders', orderId);
+        const s = rows[0];
+        const chip = { PASS: 'sip-chip-success', WARN: 'sip-chip-active', FAIL: 'sip-chip-danger' }[s.verdict]
+            || 'sip-chip-muted';
+        const label = { PASS: 'ผ่านทุกข้อ', WARN: 'ต้องตรวจเพิ่ม', FAIL: 'ไม่ผ่าน' }[s.verdict] || '—';
+        const mark = (c) => (c.level === 'PASS' ? '✓' : c.level === 'FAIL' ? '✗' : '?');
+
+        box.innerHTML = `
+            <div class="cf-slip">
+                <a class="cf-slip-img" href="${e(s.imageUrl)}" target="_blank" rel="noopener"
+                   title="เปิดภาพเต็ม"><img src="${e(s.imageUrl)}" alt="ภาพสลิปจากกล้องคีออสก์"></a>
+                <div class="cf-slip-info">
+                    <span class="sip-chip ${chip}">${label}</span>
+                    <table class="ds-table-grid">
+                        <tr><th class="l" style="width:42%">ยอดตามออเดอร์</th><td class="r">${CFApp.money(o.total)}</td></tr>
+                        <tr><th class="l">ยอดในสลิป</th><td class="r">${s.amount != null ? CFApp.money(s.amount) : '—'}</td></tr>
+                        <tr><th class="l">ธนาคาร</th><td class="l">${s.bank ? e(s.bank) : '—'}</td></tr>
+                        <tr><th class="l">เลขอ้างอิง</th><td class="l" style="word-break:break-all">${s.ref ? e(s.ref) : '—'}</td></tr>
+                        <tr><th class="l">เวลาทำรายการ</th><td class="l">${s.txAt ? CFApp.dateTime(s.txAt) : '—'}</td></tr>
+                    </table>
+                    <ul class="cf-slip-checks">
+                        ${s.checks.map((c) => `<li class="is-${e(String(c.level).toLowerCase())}">
+                            <b>${mark(c)}</b> ${e(c.msg)}</li>`).join('')}
+                    </ul>
+                    ${rows.length > 1 ? `<div class="ds-note">ลูกค้าถ่ายสลิป ${rows.length} ครั้ง — แสดงครั้งล่าสุด</div>` : ''}
+                </div>
+            </div>`;
     },
 
     onReason(v) {

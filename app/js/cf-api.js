@@ -69,6 +69,38 @@
         put:  (p, b, o) => request('PUT', p, b, o),
         patch:(p, b, o) => request('PATCH', p, b, o),
 
+        /**
+         * ส่งไฟล์เดียวแบบ multipart — ไม่ใส่ Content-Type เอง
+         * ให้เบราว์เซอร์ใส่ boundary ให้ (ใส่เองแล้วเซิร์ฟเวอร์แยกไฟล์ไม่ออก)
+         */
+        async upload(path, blob, filename) {
+            const fd = new FormData();
+            fd.append('file', blob, filename || 'upload.jpg');
+            const headers = { Accept: 'application/json' };
+            if (deviceId()) headers['X-CF-Device'] = deviceId();
+            let res;
+            try {
+                res = await fetch(baseUrl() + path, {
+                    method: 'POST', headers, body: fd, credentials: 'same-origin',
+                });
+            } catch (err) {
+                const e = new Error('ติดต่อเซิร์ฟเวอร์ในร้านไม่ได้');
+                e.offline = true;
+                e.cause = err;
+                throw e;
+            }
+            const text = await res.text();
+            let data = null;
+            try { data = text ? JSON.parse(text) : null; } catch { data = { raw: text }; }
+            if (!res.ok) {
+                const e = new Error((data && (data.message || data.error)) || ('HTTP ' + res.status));
+                e.status = res.status;
+                e.data = data;
+                throw e;
+            }
+            return data;
+        },
+
         /** ก้อนข้อมูลตั้งต้น รูปทรงเดียวกับ CF_SEED */
         bootstrap(hours) {
             return request('GET', '/api/bootstrap' + (hours ? '?hours=' + hours : ''));

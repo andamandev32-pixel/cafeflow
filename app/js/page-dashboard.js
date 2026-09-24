@@ -258,6 +258,19 @@ const DashPage = {
                 </div>
             </div>
 
+            <div class="sip-field">
+                <label class="sip-label">ตรวจสลิปด้วยกล้องคีออสก์</label>
+                <div class="ds-segbar" id="kSlip">
+                    ${CF_SLIP_MODES.map((m) => `<button type="button"
+                        class="ds-seg ${CF_SLIP_MODE(d) === m.v ? 'active' : ''}"
+                        onclick="DashPage.kSlip('${m.v}')">${m.label}</button>`).join('')}
+                </div>
+                <div class="ds-note" style="margin-top:6px">
+                    ลูกค้ายกหน้าจอสลิปขึ้นหน้ากล้อง ระบบอ่านยอด เวลา และเลขอ้างอิงเอง ·
+                    "ผ่านแล้วส่งครัวเลย" ใช้เมื่อมั่นใจความแม่นแล้ว — สลิปที่ไม่ผ่านกฎยังส่งให้แคชเชียร์ตรวจเสมอ
+                </div>
+            </div>
+
             <div class="ds-section-label">เวลา</div>
             ${num('kioskIdleSec', 'กลับหน้าแรกเมื่อไม่มีการใช้งาน (วินาที)')}
             ${num('kioskDoneSec', 'ปิดหน้าสรุปออเดอร์อัตโนมัติ (วินาที)')}
@@ -283,6 +296,12 @@ const DashPage = {
         this._kd.kioskScale = v;
         document.querySelectorAll('#kSize .ds-seg').forEach((b, i) => {
             b.classList.toggle('active', Math.abs(CF_KIOSK_SIZES[i].scale - v) < 0.02);
+        });
+    },
+    kSlip(v) {
+        this._kd.slipMode = v;
+        document.querySelectorAll('#kSlip .ds-seg').forEach((b, i) => {
+            b.classList.toggle('active', CF_SLIP_MODES[i].v === v);
         });
     },
     kDine(v) {
@@ -319,7 +338,7 @@ const DashPage = {
             // ส่งเฉพาะคีย์ของคีออสก์ ไม่เหวี่ยง settings ทั้งก้อนกลับไป
             // ไม่งั้นค่าที่คนอื่นเพิ่งแก้จากอีกเครื่องจะถูกทับด้วยค่าเก่าที่เราโหลดมาตอนเปิด drawer
             const keys = Object.keys(CF_KIOSK_DEFAULTS)
-                .concat(['kioskDiningMode', 'qrTimeoutSec', 'promptpayId']);
+                .concat(['kioskDiningMode', 'qrTimeoutSec', 'promptpayId', 'slipMode']);
             const patch = {};
             keys.forEach((k) => { if (d[k] !== undefined) patch[k] = d[k]; });
             CFStore.cmd('patch', '/api/settings', patch)

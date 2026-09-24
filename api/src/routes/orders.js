@@ -692,7 +692,8 @@ function registerOrders(app, { pool, tx, query, branchId }) {
         return { ok: true };
     }));
 
-    return { context, requirePerm, handle, audit, touch, ApiError, businessDate, settingsOf };
+    return { context, requirePerm, requireKioskOrUser, handle,
+             audit, touch, ApiError, businessDate, settingsOf };
 }
 
 module.exports = { registerOrders, createOrder, transition, setStationReady,

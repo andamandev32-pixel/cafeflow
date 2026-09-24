@@ -402,7 +402,7 @@ body.cfk-noart .cfk-card-body { border-top: 0; min-height: calc(var(--u) * 13); 
 /* ══════════════════════════════════════════════════════════
    5. รายละเอียดสินค้า
    ══════════════════════════════════════════════════════════ */
-body.cfk-portrait  .cfk-item { display: grid; grid-template-rows: auto auto 1fr auto; min-height: 0; }
+body.cfk-portrait  .cfk-item { display: grid; grid-template-rows: auto 1fr auto; min-height: 0; }
 body.cfk-landscape .cfk-item { display: grid; grid-template-rows: auto 1fr auto;
                                grid-template-columns: 1fr 1.25fr; }
 body.cfk-landscape .cfk-item > .cfk-top      { grid-column: 1 / -1; }
@@ -411,25 +411,27 @@ body.cfk-landscape .cfk-item > .cfk-actionbar { grid-column: 1 / -1; }
 .cfk-item-left { padding: var(--pad); overflow-y: auto; min-height: 0; }
 .cfk-item-scroll { overflow-y: auto; min-height: 0; padding: 0 var(--pad) var(--pad); }
 body.cfk-portrait .cfk-item-left { display: contents; }
+body.cfk-landscape .cfk-item-scroll { padding-top: var(--pad); }
 
 .cfk-hero { width: 100%; border-radius: calc(var(--u) * 1.6); overflow: hidden; }
-body.cfk-portrait  .cfk-hero { aspect-ratio: 16 / 10; margin: var(--pad) var(--pad) calc(var(--u) * .6);
+/* แนวตั้ง: รูปเป็นแถบเตี้ย ๆ — ตัวเลือกทั้งหมดต้องอยู่ในจอเดียวโดยไม่ต้องเลื่อน */
+body.cfk-portrait  .cfk-hero { height: calc(var(--u) * 15); margin: var(--pad) var(--pad) calc(var(--u) * .4);
                                width: auto; }
 body.cfk-landscape .cfk-hero { aspect-ratio: 1 / 1; }
 .cfk-hero .cfk-media { width: 100%; height: 100%; }
 
-.cfk-item-name { font-size: calc(var(--u) * 2.8); font-weight: 700; color: #111; line-height: 1.25; }
-.cfk-item-en   { font-size: calc(var(--u) * 1.6); color: var(--text-light);
-                 margin-bottom: calc(var(--u) * 1.4); }
+.cfk-item-name { font-size: calc(var(--u) * 2.3); font-weight: 700; color: #111; line-height: 1.25; }
+.cfk-item-en   { font-size: calc(var(--u) * 1.4); color: var(--text-light);
+                 margin-bottom: calc(var(--u) * .4); }
 .cfk-item-eyebrow { font-size: calc(var(--u) * 1.3); font-weight: 700; letter-spacing: .06em;
                     text-transform: uppercase; color: var(--text-muted); }
 
-.cfk-optgroup { margin-top: calc(var(--u) * 2); }
+.cfk-optgroup { margin-top: calc(var(--u) * 1.3); }
 .cfk-optgroup-head {
     display: flex; align-items: center; gap: calc(var(--u) * .8); flex-wrap: wrap;
-    margin-bottom: calc(var(--u) * .9);
+    margin-bottom: calc(var(--u) * .6);
 }
-.cfk-optgroup-head b { font-size: calc(var(--u) * 1.85); font-weight: 700; color: #111; }
+.cfk-optgroup-head b { font-size: calc(var(--u) * 1.6); font-weight: 700; color: #111; }
 .cfk-tag {
     padding: calc(var(--u) * .25) calc(var(--u) * .9); border-radius: 999px;
     font-size: calc(var(--u) * 1.15); font-weight: 700;
@@ -438,44 +440,47 @@ body.cfk-landscape .cfk-hero { aspect-ratio: 1 / 1; }
 }
 .cfk-tag-req { background: var(--brand-amber-50); color: #8A6400; border-color: #FDE68A; }
 
-.cfk-opts { display: grid; gap: calc(var(--u) * .9); }
-body.cfk-portrait  .cfk-opts { grid-template-columns: repeat(2, 1fr); }
-body.cfk-landscape .cfk-opts { grid-template-columns: repeat(3, 1fr); }
+/* ตัวเลือกเป็นปุ่มกลม เรียงต่อกันในบรรทัดเดียว (สูงสุด 6 ปุ่มต่อบรรทัด)
+   ปุ่มกว้างอย่างน้อย 1/6 ของแถว ชื่อยาวก็ขยายกว้างขึ้นเอง ไม่ตัดคำ */
+.cfk-opts { --gap: calc(var(--u) * .7); display: flex; flex-wrap: wrap; gap: var(--gap); }
 .cfk-opt {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: calc(var(--u) * .6); cursor: pointer; font-family: inherit; text-align: left;
-    padding: calc(var(--u) * 1.3) calc(var(--u) * 1.4);
-    min-height: calc(var(--u) * 5.4);
-    background: #fff; border: 0.8px solid var(--brand-border); border-radius: var(--r);
-    font-size: calc(var(--u) * 1.6); font-weight: 600; color: #111; line-height: 1.3;
+    flex: 0 1 auto; min-width: calc((100% - 5 * var(--gap)) / 6);
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: calc(var(--u) * .5); cursor: pointer; font-family: inherit; text-align: center;
+    padding: calc(var(--u) * .7) calc(var(--u) * 1.3);
+    min-height: calc(var(--u) * 4.4);
+    background: #fff; border: 0.8px solid var(--brand-border); border-radius: 999px;
+    font-size: calc(var(--u) * 1.45); font-weight: 600; color: #111; line-height: 1.2;
 }
-.cfk-opt b { flex-shrink: 0; font-size: calc(var(--u) * 1.4); color: var(--primary-dark); }
+.cfk-opt b { flex-shrink: 0; font-size: calc(var(--u) * 1.25); color: var(--primary-dark); }
 .cfk-opt.active { background: var(--primary-bg); border-color: var(--primary);
                   color: var(--primary-dark); font-weight: 700; }
 .cfk-optgroup.is-missing .cfk-optgroup-head b { color: var(--status-danger); }
 .cfk-optgroup.is-missing .cfk-opt { border-color: #FFC9CE; }
 
 /* ปุ่มแบบเสิร์ฟ — ราคาโชว์ใต้ชื่อ เห็นก่อนกด */
-.cfk-serves-pick { display: grid; gap: calc(var(--u) * .9);
-                   grid-template-columns: repeat(auto-fit, minmax(calc(var(--u) * 11), 1fr)); }
+.cfk-serves-pick { display: flex; flex-wrap: wrap; gap: calc(var(--u) * .7); }
 .cfk-serve {
-    display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * .2);
-    cursor: pointer; font-family: inherit; min-height: calc(var(--u) * 6.4);
-    padding: calc(var(--u) * 1.2);
-    background: #fff; border: 0.8px solid var(--brand-border); border-radius: var(--r);
+    flex: 1 1 0; display: flex; align-items: center; justify-content: center;
+    gap: calc(var(--u) * .7);
+    cursor: pointer; font-family: inherit; min-height: calc(var(--u) * 4.8);
+    padding: calc(var(--u) * .7) calc(var(--u) * 1.4);
+    background: #fff; border: 0.8px solid var(--brand-border); border-radius: 999px;
 }
-.cfk-serve b     { font-size: calc(var(--u) * 1.9); font-weight: 700; color: #111; }
-.cfk-serve small { font-size: calc(var(--u) * 1.5); font-weight: 600; color: var(--text-muted); }
+.cfk-serve b     { font-size: calc(var(--u) * 1.7); font-weight: 700; color: #111; }
+.cfk-serve small { font-size: calc(var(--u) * 1.4); font-weight: 600; color: var(--text-muted); }
 .cfk-serve.active { background: var(--primary); border-color: var(--primary); }
 .cfk-serve.active b, .cfk-serve.active small { color: #fff; }
 
-.cfk-qty { display: flex; align-items: center; gap: calc(var(--u) * 1.6);
-           margin-top: calc(var(--u) * 1); }
+.cfk-qty { display: flex; align-items: center; gap: calc(var(--u) * 1.4); }
 .cfk-qty button {
-    width: calc(var(--u) * 6); height: calc(var(--u) * 6); cursor: pointer;
+    width: calc(var(--u) * 4.8); height: calc(var(--u) * 4.8); cursor: pointer;
     display: grid; place-items: center; font-family: inherit;
-    background: #fff; border: 0.8px solid var(--brand-border); border-radius: var(--r); color: #111;
+    background: #fff; border: 0.8px solid var(--brand-border); border-radius: 50%; color: #111;
 }
+/* จำนวนอยู่บรรทัดเดียวกับหัวข้อ — ประหยัดความสูงอีกหนึ่งแถว */
+.cfk-optgroup-qty { display: flex; align-items: center; justify-content: space-between; }
+.cfk-optgroup-qty .cfk-optgroup-head { margin-bottom: 0; }
 .cfk-qty button:disabled { opacity: .35; pointer-events: none; }
 .cfk-qty button .cfk-ic { width: calc(var(--u) * 2.4); height: calc(var(--u) * 2.4); }
 .cfk-qty output { font-size: calc(var(--u) * 2.6); font-weight: 800; color: #111;
@@ -655,4 +660,156 @@ body.cfk-landscape .cfk-upgrid { grid-template-columns: repeat(4, 1fr); align-co
 .cf-pair-msg {
     min-height: 22px; text-align: center;
     font-size: 15px; color: var(--text-secondary);
+}
+
+/* ══════════════════════════════════════════════════════════
+   หน้าชำระ QR + กล้องตรวจสลิป (§17) — หน้าเดียวจบ
+   แถวบน: QR | ภาพตัวอย่างวิธียกสลิป · ล่าง: กล้องจริง + ปุ่มถ่าย/ถ่ายใหม่
+   แนวนอน: แถวบนอยู่ซ้าย กล้องอยู่ขวา
+   ══════════════════════════════════════════════════════════ */
+.cfk-paygrid.has-cam { justify-content: flex-start; gap: calc(var(--u) * 1.4); }
+.cfk-paycol {
+    display: flex; flex-direction: column; align-items: center;
+    gap: calc(var(--u) * 1.1); width: 100%;
+}
+.cfk-payrow { display: contents; }
+.cfk-paygrid.has-cam .cfk-payrow {
+    display: grid; grid-template-columns: auto 1fr; gap: calc(var(--u) * 1.4);
+    width: 100%; align-items: stretch;
+}
+.cfk-paygrid.has-cam .cfk-payrow > .cfk-paycol { width: auto; justify-content: center; }
+.cfk-paygrid.has-cam .cfk-qr-img { width: calc(var(--u) * 20); height: calc(var(--u) * 20); }
+.cfk-paygrid.has-cam .cfk-qr:not(.has-qr) { width: calc(var(--u) * 20); }
+.cfk-payamt { font-size: calc(var(--u) * 5); }
+.cfk-paygrid.has-cam .cfk-payamt { font-size: calc(var(--u) * 4); }
+
+body.cfk-landscape .cfk-paygrid.has-cam {
+    display: grid; grid-template-columns: 1.1fr 1fr; align-items: center;
+}
+
+/* ── การ์ดตัวอย่างข้าง QR ── */
+.cfk-guide {
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center;
+    gap: calc(var(--u) * 1); padding: calc(var(--u) * 1.4);
+    border-radius: calc(var(--u) * 1.6);
+    background: radial-gradient(circle at 50% 110%, #4b5563 0 45%, transparent 46%),
+                linear-gradient(#4b5563, #2b3036);
+    color: #fff;
+}
+.cfk-guide-title { font-size: calc(var(--u) * 1.6); font-weight: 800; text-align: center; }
+.cfk-guide-stage {
+    position: relative; flex: 1; width: 100%; min-height: calc(var(--u) * 20);
+    display: grid; place-items: center;
+}
+.cfk-guide-aim { position: absolute; inset: 2% 18%; }
+.cfk-guide-aim i {
+    position: absolute; width: 20%; height: 16%;
+    border: 4px solid rgba(255, 255, 255, .7);
+}
+.cfk-guide-aim i:nth-child(1) { top: 0; left: 0; border-right: 0; border-bottom: 0; border-top-left-radius: 10px; }
+.cfk-guide-aim i:nth-child(2) { top: 0; right: 0; border-left: 0; border-bottom: 0; border-top-right-radius: 10px; }
+.cfk-guide-aim i:nth-child(3) { bottom: 0; left: 0; border-right: 0; border-top: 0; border-bottom-left-radius: 10px; }
+.cfk-guide-aim i:nth-child(4) { bottom: 0; right: 0; border-left: 0; border-top: 0; border-bottom-right-radius: 10px; }
+.cfk-guide-phone {
+    position: relative; height: calc(var(--u) * 19); width: auto;
+    filter: drop-shadow(0 8px 20px rgba(0, 0, 0, .45));
+    animation: cfk-guide-in 3.2s ease-in-out infinite;
+}
+.cfk-guide-qr { animation: cfk-guide-qr 1.6s ease-in-out infinite; transform-origin: 89px 157px; }
+.cfk-guide-tips { display: flex; flex-wrap: wrap; justify-content: center; gap: calc(var(--u) * .5); }
+.cfk-guide-tips span {
+    padding: calc(var(--u) * .4) calc(var(--u) * .9); border-radius: 999px;
+    background: rgba(255, 255, 255, .92); color: #111;
+    font-size: calc(var(--u) * 1.15); font-weight: 700; white-space: nowrap;
+}
+/* ยกมือถือเข้ามาในกรอบ → ค้าง → ถอยออก วนซ้ำ */
+@keyframes cfk-guide-in {
+    0%   { transform: translate(-30%, 18%) rotate(-10deg) scale(.86); opacity: 0; }
+    25%  { transform: translate(0, 0) rotate(0) scale(1); opacity: 1; }
+    75%  { transform: translate(0, 0) rotate(0) scale(1); opacity: 1; }
+    100% { transform: translate(-30%, 18%) rotate(-10deg) scale(.86); opacity: 0; }
+}
+@keyframes cfk-guide-qr { 50% { transform: scale(1.12); } }
+
+/* ── ตัวชี้ลอยเหนือกล้อง ── */
+.cfk-cam-point {
+    display: flex; flex-direction: column; align-items: center;
+    margin-bottom: calc(var(--u) * -0.8);
+    font-size: calc(var(--u) * 1.5); font-weight: 800;
+    animation: cfk-point 1.2s ease-in-out infinite;
+}
+.cfk-cam-point span {
+    padding: calc(var(--u) * .5) calc(var(--u) * 1.3); border-radius: 999px;
+    background: var(--primary); color: #fff;
+}
+.cfk-cam-point svg { width: calc(var(--u) * 3); height: calc(var(--u) * 3); color: var(--primary); }
+@keyframes cfk-point {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(calc(var(--u) * .9)); }
+}
+
+/* ── กล้องจริง — สถานะอยู่ที่ data-state: starting · scan · checking · fail · nocam · demo ── */
+.cfk-cam {
+    position: relative; width: 100%; aspect-ratio: 4 / 3; overflow: hidden;
+    border-radius: calc(var(--u) * 1.6); background: #111;
+    border: 3px solid transparent; transition: border-color .15s;
+}
+.cfk-cam video, .cfk-cam img {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    /* กลับซ้าย-ขวาเฉพาะที่แสดง ให้ลูกค้าเล็งเหมือนส่องกระจก
+       ภาพที่ส่งตรวจถ่ายจาก video ตรง ๆ จึงไม่กลับ — ตัวหนังสือบนสลิปยังอ่านได้ */
+    transform: scaleX(-1);
+}
+.cfk-cam img { display: none; }
+.cfk-cam[data-state="checking"] img,
+.cfk-cam[data-state="fail"] img { display: block; }
+.cfk-cam[data-state="checking"] img { filter: brightness(.55); }
+.cfk-cam[data-state="fail"] img { filter: brightness(.4) saturate(.5); }
+
+.cfk-cam-aim { position: absolute; inset: 12% 24%; pointer-events: none; }
+.cfk-cam-aim i {
+    position: absolute; width: 18%; height: 18%;
+    border: 4px solid rgba(255, 255, 255, .85); transition: border-color .15s;
+}
+.cfk-cam-aim i:nth-child(1) { top: 0; left: 0; border-right: 0; border-bottom: 0; border-top-left-radius: 10px; }
+.cfk-cam-aim i:nth-child(2) { top: 0; right: 0; border-left: 0; border-bottom: 0; border-top-right-radius: 10px; }
+.cfk-cam-aim i:nth-child(3) { bottom: 0; left: 0; border-right: 0; border-top: 0; border-bottom-left-radius: 10px; }
+.cfk-cam-aim i:nth-child(4) { bottom: 0; right: 0; border-left: 0; border-top: 0; border-bottom-right-radius: 10px; }
+.cfk-cam.is-found { border-color: var(--primary); }
+.cfk-cam.is-found .cfk-cam-aim i { border-color: var(--primary); }
+.cfk-cam:not([data-state="scan"]) .cfk-cam-aim { display: none; }
+
+.cfk-cam-msg {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+    display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * .8);
+    padding: calc(var(--u) * 1.1) calc(var(--u) * 1.4);
+    background: linear-gradient(transparent, rgba(0, 0, 0, .72));
+    color: #fff; font-size: calc(var(--u) * 1.5); font-weight: 600; text-align: center;
+}
+.cfk-cam-msg .cfk-ic { width: calc(var(--u) * 2); height: calc(var(--u) * 2); flex-shrink: 0; }
+.cfk-cam-msg small { font-weight: 400; opacity: .85; }
+.cfk-cam:not([data-state="scan"]) .cfk-cam-msg {
+    top: 0; flex-direction: column; background: none; font-size: calc(var(--u) * 1.8);
+}
+.cfk-cam[data-state="checking"] .cfk-cam-msg .cfk-ic { animation: cfk-spin 1.2s linear infinite; }
+.cfk-cam[data-state="fail"] .cfk-cam-msg .cfk-ic { color: #FCD34D; }
+.cfk-cam[data-state="nocam"], .cfk-cam[data-state="demo"] {
+    background: var(--brand-amber-50); border: 3px dashed var(--brand-border-strong);
+}
+.cfk-cam[data-state="demo"] { background: #fff; aspect-ratio: 16 / 7; }
+.cfk-cam[data-state="nocam"] .cfk-cam-msg { color: #8A6400; }
+.cfk-cam[data-state="demo"] .cfk-cam-msg { color: var(--text-light); font-size: calc(var(--u) * 1.4); }
+.cfk-cam[data-state="nocam"] .cfk-cam-msg .cfk-ic,
+.cfk-cam[data-state="demo"] .cfk-cam-msg .cfk-ic,
+.cfk-cam[data-state="starting"] .cfk-cam-msg .cfk-ic { width: calc(var(--u) * 4); height: calc(var(--u) * 4); }
+
+/* ปุ่มใต้กล้อง — ระบบถ่ายเองอยู่แล้ว ปุ่มนี้เป็นทางสำรองเมื่อจับเองไม่ได้ */
+.cfk-cam-btns { display: flex; gap: calc(var(--u) * 1); width: 100%; }
+.cfk-cam-btns .cfk-btn:disabled { opacity: .45; cursor: default; }
+
+@keyframes cfk-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+    .cfk-cam-point, .cfk-guide-phone, .cfk-guide-qr,
+    .cfk-cam[data-state="checking"] .cfk-cam-msg .cfk-ic { animation: none; }
 }

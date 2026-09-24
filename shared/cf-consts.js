@@ -82,6 +82,20 @@
     }
 
     /**
+     * การตรวจสลิปด้วยกล้องคีออสก์ (§14, §17)
+     * ค่าเริ่ม review — เอกสาร §15 ให้ OCR เป็นหลักฐานประกอบ ไม่ใช่ตัวตัดสินเดียว
+     * ร้านที่วัดความแม่นกับสลิปจริงแล้วค่อยเปิด auto เอง
+     */
+    const CF_SLIP_MODES = [
+        { v: 'review', label: 'ให้แคชเชียร์ยืนยัน' },
+        { v: 'auto',   label: 'ผ่านแล้วส่งครัวเลย' },
+        { v: 'off',    label: 'ปิดกล้อง' },
+    ];
+    function CF_SLIP_MODE(s) {
+        return (s && CF_SLIP_MODES.some((m) => m.v === s.slipMode)) ? s.slipMode : 'review';
+    }
+
+    /**
      * ค่าเริ่มต้นของคีออสก์ — ประกาศที่เดียว ใช้ทั้งหน้าคีออสก์และหน้าตั้งค่าหลังบ้าน
      * อ่านผ่านตัว merge เสมอ ฐานข้อมูลเก่าที่ยังไม่มีคีย์จึงไม่พัง
      */
@@ -104,6 +118,6 @@
     return {
         CF_STATIONS, CF_SERVE, CF_SERVE_ORDER, CF_STATUS,
         CF_DINING, CF_DINING_MODES, CF_DINING_MODE,
-        CF_KIOSK_DEFAULTS, CF_KIOSK_SIZES,
+        CF_KIOSK_DEFAULTS, CF_KIOSK_SIZES, CF_SLIP_MODES, CF_SLIP_MODE,
     };
 });

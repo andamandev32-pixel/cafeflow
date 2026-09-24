@@ -458,6 +458,7 @@ function CF_SEED(now) {
             taxId: '0835566001234',
             vatPercent: 7,
             qrTimeoutSec: 60,
+            slipMode: 'review',             // review | auto | off — ดู CF_SLIP_MODES
             cashMode: 'A',
             kdsWarnMin: 3,
             kdsDangerMin: 6,
