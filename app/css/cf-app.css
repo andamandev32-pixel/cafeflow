@@ -98,13 +98,12 @@
     gap: 12px; padding: 16px;
 }
 .cf-kds-card {
-    background: var(--white); border: 0.8px solid var(--brand-border);
-    border-top: 4px solid var(--status-success);
+    background: var(--white); border: 1px solid var(--status-success);
     border-radius: var(--r-lg); padding: 14px;
     box-shadow: none; display: flex; flex-direction: column; gap: 9px;
 }
-.cf-kds-card.warn   { border-top-color: var(--status-warning); }
-.cf-kds-card.danger { border-top-color: var(--status-danger); animation: pulse 1.6s infinite; }
+.cf-kds-card.warn   { border-color: var(--status-warning); }
+.cf-kds-card.danger { border-color: var(--status-danger); animation: pulse 1.6s infinite; }
 .cf-kds-top   { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .cf-kds-no    { font-size: 30px; font-weight: 800; color: var(--brand-navy); line-height: 1; }
 .cf-kds-timer {
