@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>เร่งตรวจสลิป 3 วินาที</title>
+<style>
+:root {
+    --bg: #1F1F1F; --text: #CCCCCC; --strong: #E6E6E6; --muted: #9D9D9D;
+    --line: #3C3C3C; --code-bg: #2B2B2B; --code-text: #D7D7D7;
+    --th-bg: #2A2A2A; --row-line: #333333; --box-bg: #1F1F1F; --link: #4DAAFC;
+}
+:root[data-theme="light"] {
+    --bg: #FFFFFF; --text: #1F1F1F; --strong: #000000; --muted: #616161;
+    --line: #E0E0E0; --code-bg: #F0F0F0; --code-text: #1F1F1F;
+    --th-bg: #F5F5F5; --row-line: #E8E8E8; --box-bg: #FAFAFA; --link: #005FB8;
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.75 -apple-system, "Segoe UI", "Leelawadee UI", "Noto Sans Thai", system-ui, sans-serif;
+}
+main { max-width: 860px; margin: 0 auto; padding: 24px 16px 64px; }
+.status {
+    border: 1px solid var(--line); border-radius: 6px; background: var(--box-bg);
+    padding: 14px 16px; margin-bottom: 28px;
+}
+.status b { display: block; color: var(--strong); font-size: 15px; }
+.status span { color: var(--muted); font-size: 13px; }
+h1, h2, h3 { color: var(--strong); font-weight: 600; line-height: 1.35; }
+h1 { font-size: 26px; margin: 0 0 16px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+h2 { font-size: 21px; margin: 36px 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+h3 { font-size: 16px; margin: 28px 0 10px; }
+p { margin: 0 0 14px; }
+ul { margin: 0 0 14px; padding-left: 26px; }
+li { margin: 4px 0; }
+li > ul { margin: 4px 0 0; }
+strong { color: var(--strong); }
+code {
+    font-family: "Cascadia Code", Consolas, "SF Mono", ui-monospace, monospace; font-size: 13px;
+    background: var(--code-bg); color: var(--code-text); padding: 2px 6px; border-radius: 4px;
+    overflow-wrap: anywhere;
+}
+h3 code { font-size: 14px; }
+.table-wrap { overflow-x: auto; margin: 0 0 16px; }
+table { border-collapse: collapse; width: 100%; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--row-line); vertical-align: top; }
+th { background: var(--th-bg); color: var(--strong); font-weight: 600; }
+ol { margin: 0 0 14px; padding-left: 26px; }
+.theme-toggle {
+    position: fixed; top: 12px; right: 12px; background: var(--code-bg); color: var(--text);
+    border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px; font: inherit; font-size: 12px; cursor: pointer;
+}
+@media (max-width: 560px) { h1 { font-size: 22px; } h2 { font-size: 18px; } main { padding-top: 52px; } }
+</style>
+</head>
+<body>
+<button class="theme-toggle" type="button" onclick="(function(r){r.dataset.theme=r.dataset.theme==='light'?'dark':'light';try{localStorage.setItem('cf-plan-theme',r.dataset.theme)}catch(e){}})(document.documentElement)">สว่าง / มืด</button>
+<script>try{var t=localStorage.getItem('cf-plan-theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<main>
+
+<div class="status">
+    <b>พร้อมให้ dev ทำ</b>
+    <span>แผนงาน · payments / slip-ocr / kiosk · บันทึกเมื่อ 10 ต.ค. 2569 · วัดจาก commit 9c73f63</span>
+</div>
+
+<h1>เร่งตรวจสลิปให้จบภายใน 3 วินาที</h1>
+
+<h2>Context</h2>
+<p>ต้องการให้ตั้งแต่คีออสก์ถ่ายสลิปจนได้ผลตรวจ จบภายใน 3 วินาที วัดจริงบนเครื่อง dev (Ryzen 7 5825U) ด้วย <code>api/src/slip-ocr.js</code> ตัวปัจจุบัน:</p>
+
+<div class="table-wrap"><table>
+    <thead><tr><th>ภาพ</th><th>เวลา</th></tr></thead>
+    <tbody>
+        <tr><td>สลิปสังเคราะห์สะอาด (data/slips/*, 720–1280px)</td><td>0.65–0.95 วิ</td></tr>
+        <tr><td>เฟรม 1920×1080 + noise แบบเว็บแคมจริง</td><td><strong>2.4–2.5 วิ</strong> (และ jsQR ฝั่งเซิร์ฟเวอร์อ่าน QR ไม่ออก)</td></tr>
+    </tbody>
+</table></div>
+
+<p>แยกขั้นของกรณี noise — <strong>ตัวช้าไม่ใช่ OCR</strong>:</p>
+<ul>
+    <li>jsQR ทั้งเฟรม <code>attemptBoth</code> ที่หาไม่เจอ: <strong>~1.1 วิ</strong> (<code>dontInvert</code> ยัง 0.55 วิ) · ถ้าครอปรอบตำแหน่ง QR: <strong>30 ms</strong> และอ่านออก</li>
+    <li><code>cv.encode('png')</code> ภาพ noise: <strong>~0.56 วิ</strong> · JPEG q95: <strong>44 ms</strong></li>
+    <li>OCR รับ PNG: <strong>0.97 วิ</strong> · รับ JPEG q95: <strong>0.44 วิ</strong> (อ่านยอด/เวลา/เลขอ้างอิงถูกเท่ากัน)</li>
+</ul>
+<p>คาดหลังแก้: ~0.6–0.8 วิบนเครื่องนี้ · เครื่องเซิร์ฟเวอร์ร้านที่ช้ากว่า 2 เท่ายังไม่เกิน ~1.6 วิ</p>
+
+<h2>Changes</h2>
+
+<h3>1. ส่งภาพเข้า OCR เป็น JPEG แทน PNG — <code>api/src/slip-ocr.js</code></h3>
+<ul>
+    <li><code>prepForOcr()</code> คืน <code>cv.encode('jpeg', 95)</code> แทน <code>cv.encode('png')</code> (คงขาวดำ+ยืดคอนทราสต์เดิม)</li>
+</ul>
+
+<h3>2. ถอด QR เฉพาะจุดที่คีออสก์เห็น — kiosk + server</h3>
+<p>คีออสก์ถอด mini-QR อยู่แล้วตอนจับภาพอัตโนมัติ (<code>camScan</code> ใน <code>app/js/cf-kiosk-core.js:998</code>) จึงรู้ตำแหน่ง</p>
+<ul>
+    <li><strong>คีออสก์</strong>: เก็บ <code>r.location</code> ล่าสุด (ขยายกลับเป็นพิกัดเฟรมเต็มด้วย <code>1/s</code>) → <code>camSnap</code> ส่งเป็น query <code>?qr=x,y,w,h</code> ต่อท้าย path ใน <code>CFApi.upload(...)</code> (ไม่ต้องแก้ <code>cf-api.js</code>; ใช้ query แทน multipart field เพราะ <code>req.file()</code> เห็นเฉพาะ field ก่อนไฟล์) ปุ่ม "ถ่ายภาพ" กดเองไม่มี hint → ไม่ส่ง</li>
+    <li><strong>เซิร์ฟเวอร์</strong>: <code>read(buf, hint)</code> → ถ้ามี hint: ครอปกรอบนั้น + ขอบ 25% แล้ว jsQR (<code>dontInvert</code>) ไม่เจอ/ไม่มี hint → fallback ทั้งภาพที่ 960px <code>dontInvert</code> (ตัด <code>attemptBoth</code> — คีออสก์เองก็ใช้ <code>dontInvert</code>)</li>
+    <li>เซิร์ฟเวอร์ยังถอด QR เอง — hint เป็นแค่ "ดูตรงไหน" ไม่ใช่ข้อมูลที่เชื่อ (คงหลัก "คีออสก์ส่งแค่ภาพ" ที่ <code>payments.js:149</code>)</li>
+    <li><code>payments.js</code> route <code>/api/orders/:id/slip</code>: parse <code>req.query.qr</code> (ตัวเลข 4 ค่า, clamp ในขนาดภาพ, ผิดรูป = ไม่ใช้) → ส่งต่อ <code>checkSlip(deps, id, buf, ctx, hint)</code> → <code>slipOcr.read(buf, hint)</code></li>
+</ul>
+
+<h3>3. วัดเวลาแยกขั้น + สคริปต์ benchmark</h3>
+<ul>
+    <li><code>read()</code> คืน <code>stages: { decode, qr, prep, ocr }</code> เพิ่มจาก <code>ms</code> เดิม → เก็บใน <code>ocr_raw</code> (JSON เดิม) และต่อท้าย log <code>[slip]</code> ใน <code>payments.js:369</code></li>
+    <li><code>api/scripts/bench-slip.js</code> + <code>npm run bench-slip</code>: รันภาพใน <code>data/slips/**</code> + เฟรมสังเคราะห์ 1920×1080 มี noise พิมพ์เวลาแต่ละขั้นและตรวจว่า <code>CFSlipRules.parse</code> ได้ยอด/เวลา/ref — ใช้ยืนยันเป้า 3 วิบนเครื่องจริงของร้าน</li>
+</ul>
+
+<h3>4. เพดานเวลา</h3>
+<ul>
+    <li><code>TIMEOUT_MS</code> 20000 → 8000: ถ้า OCR ค้างผิดปกติ ลูกค้าไม่ต้องยืนรอ 20 วิ (ตกไป REVIEW ตามทางเดิมใน <code>checkSlip</code>)</li>
+</ul>
+
+<h2>ไม่ทำในรอบนี้</h2>
+<ul>
+    <li>ตรวจบัญชีผู้รับ (พักไว้ก่อน)</li>
+    <li>ครอปตามกรอบเล็ง — หลังข้อ 1–2 ได้เพิ่มน้อย (~0.1–0.2 วิ) แต่เสี่ยงตัดสลิปถ้าลูกค้าถือเบี้ยว</li>
+    <li>worker หลายตัว — จำเป็นเมื่อมีหลายคีออสก์ส่งพร้อมกัน ค่อยทำเมื่อมีคีออสก์ที่ 2</li>
+</ul>
+
+<h2>Verification</h2>
+<ol>
+    <li><code>npm test</code> ใน <code>api/</code> (slip-rules.test.js ต้องผ่านเหมือนเดิม)</li>
+    <li><code>npm run bench-slip</code> ก่อน/หลัง — เฟรม noise ต้อง &lt; 1 วิ และ parse ได้ยอด 65.00 / ref / เวลา; สลิปเดิมใน data/slips ผลเหมือนเดิม</li>
+    <li>ทดสอบจริงที่คีออสก์: สแกนสลิปบนมือถือ → ดู log <code>[slip] ... stages=</code> รวม &lt; 3 วิ และ QR ถอดได้ (<code>parsed_source = BARCODE</code>)</li>
+    <li>กด "ถ่ายภาพ" เอง (ไม่มี hint) → ยังทำงานผ่าน fallback</li>
+</ol>
+
+</main>
+</body>
+</html>
